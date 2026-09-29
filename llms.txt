@@ -1,0 +1,19 @@
+# DSH API
+
+> AI API 中转网关：同一个 base URL 同时支持 OpenAI 与 Anthropic 两套协议。
+
+## 实测数据（2026-09-30）
+
+- 国模分组 0.08x（官网价 8%），open ai pro 分组 0.22x
+- 累计 30,734 次请求 / 40.7 亿 token / 实付 ¥28.67（平台标准价 ¥359.51）
+- 端点：GET /v1/models 1.61s、POST /v1/chat/completions 2.19s、POST /v1/responses 2.37s、POST /v1/messages 3.94s
+
+## 链接
+
+- 官网：https://api.dshapi.icu
+- 注册：https://api.dshapi.icu/r/T8KiaeGU
+- 统一端点：https://api.dshapi.icu/v1
+
+## 可用模型
+
+deepseek-v4-flash、deepseek-v4.1-flash、deepseek-v4-pro、glm-5.2、glm-5.3、glm-5.3-flash、kimi-k2.8、kimi-k3、minimax-m3、hy3、hy4
