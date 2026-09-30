@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>换中转站不用改代码：Claude Code / Codex CLI / Cherry Studio 迁移清单</title>
+<meta name="description" content="切换 AI API 中转站只需改环境变量。附 Claude Code、Codex CLI、Cherry Studio、Cline、LobeChat 的完整配置与迁移检查清单。">
+<meta name="keywords" content="Claude Code中转配置,Codex CLI配置,中转站迁移,Cherry Studio配置,One API配置,ANTHROPIC_BASE_URL,OPENAI_BASE_URL">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/migrate-relay.html">
+<meta property="og:title" content="换中转站不用改代码：全工具迁移清单">
+<meta property="og:description" content="只改两个环境变量，主站挂了你也能立刻切备用站。">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--card2:#151d3b;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#ffb454}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 90px}
+.wrap{max-width:900px;margin:0 auto}
+header{padding:52px 0 26px}
+.badge{display:inline-block;padding:5px 13px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(25px,4.4vw,40px);line-height:1.32;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16.5px}
+h2{font-size:21px;margin:44px 0 14px;padding-left:13px;border-left:4px solid var(--acc)}
+h3{font-size:17px;margin:26px 0 10px;color:#c9d6ff}
+p{margin:12px 0;color:#d3dbf0}
+ul,ol{margin:12px 0 12px 22px;color:#d3dbf0}
+li{margin:7px 0}
+.cta{display:inline-block;margin:24px 10px 0 0;padding:15px 32px;border-radius:14px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.32)}
+.cta.ghost{background:transparent;border:1px solid var(--line);box-shadow:none;color:var(--txt)}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:16px 0;overflow:hidden;border-radius:12px}
+td,th{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:13.5px;background:#0c1226}
+code{background:#0d1428;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:13.5px;color:#a9c6ff}
+pre{position:relative;background:#070b16;border:1px solid var(--line);border-radius:14px;padding:18px 16px;overflow:auto;font:13.5px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff;margin:14px 0}
+.card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0}
+.card b{display:block;font-size:16px;margin-bottom:8px;color:#fff}
+.ok{color:var(--ok)}.warn{color:var(--warn)}
+.check li{list-style:none;margin:9px 0;padding-left:26px;position:relative}
+.check li:before{content:"☐";position:absolute;left:0;color:var(--acc)}
+.faq{margin:14px 0}
+.faq b{display:block;color:#fff;margin:16px 0 4px;font-size:15.5px}
+.faq p{color:var(--dim);font-size:14.5px;margin:0}
+.note{border-left:3px solid var(--warn);padding:10px 16px;background:#14102033;border-radius:0 10px 10px 0;color:#e7d5b8;font-size:14.5px;margin:18px 0}
+.qbox{display:flex;gap:26px;align-items:center;flex-wrap:wrap;background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:18px;padding:24px;margin:30px 0}
+.qbox img{width:180px;border-radius:12px}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--dim);font-size:13.5px}
+a{color:#7fa8ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="badge">迁移指南 · 2026</span>
+  <h1>换中转站不用改代码<br>全工具迁移清单</h1>
+  <p class="sub">主站挂了不是最难受的 —— 最难受的是挂的时候账号里还有钱、任务正跑到一半。留一个备用站，改一行环境变量就能切。</p>
+</header>
+
+<h2>一、切换只需要改什么</h2>
+<p>绝大多数工具只认两个东西：<b>base_url</b> 和 <b>key</b>。</p>
+
+<h3>Claude Code</h3>
+<pre>export ANTHROPIC_BASE_URL="https://api.dshapi.icu"
+export ANTHROPIC_AUTH_TOKEN="sk-你的key"
+export ANTHROPIC_MODEL="claude-sonnet-4-5"</pre>
+
+<h3>Codex CLI / OpenAI SDK 系</h3>
+<pre>export OPENAI_BASE_URL="https://api.dshapi.icu/v1"
+export OPENAI_API_KEY="sk-你的key"</pre>
+
+<h3>Cherry Studio / LobeChat / NextChat / One API 系</h3>
+<table>
+<tr><th>字段</th><th>填什么</th></tr>
+<tr><td>API 地址 / Base URL</td><td><code>https://api.dshapi.icu/v1</code></td></tr>
+<tr><td>密钥</td><td><code>sk-</code> 开头的 key</td></tr>
+<tr><td>模型名</td><td>见下方清单</td></tr>
+</table>
+
+<h3>Cline / Roo Code / Continue 等 VS Code 插件</h3>
+<p>协议选 <b>OpenAI Compatible</b>，Base URL 填 <code>https://api.dshapi.icu/v1</code>，其余同上。</p>
+
+<h2>二、迁移检查清单</h2>
+<ul class="check">
+<li>新站的 <code>/v1/models</code> 能返回你需要的模型名</li>
+<li>同一个 prompt 连发两次，第二次更便宜（缓存生效）</li>
+<li><code>usage</code> 字段里有 <code>prompt_cache_hit_tokens</code>（计费透明）</li>
+<li>主站 key 先别删，跑一周双写对比再决定</li>
+<li>两家都只留一个月用量，不锁大额</li>
+</ul>
+
+<h2>三、模型名对照（常见）</h2>
+<pre>deepseek-v4-flash      deepseek-v4.1-flash    deepseek-v4-pro
+glm-5.2                glm-5.3                glm-5.3-flash
+kimi-k2.8              kimi-k3                minimax-m3
+hy3                    hy4</pre>
+<p>Claude / GPT 系模型走独立分组，模型名以 <code>/v1/models</code> 返回为准。</p>
+
+<h2>四、迁移前必须确认的三条计费差异</h2>
+<ol>
+<li><b>缓存读怎么计价</b> —— 正常 10% 左右，15%~30% 就要注意</li>
+<li><b>输出按什么倍率</b> —— 有的站输入便宜输出贵，总价反而更高</li>
+<li><b>有没有最低消费 / 套餐绑定</b> —— 按量的站更灵活</li>
+</ol>
+
+<h2>五、常见迁移问题</h2>
+<div class="faq">
+<b>Q：换站之后 Claude Code 报模型不存在？</b>
+<p>先 <code>curl /v1/models</code> 拿到确切模型名再填，别照抄教程。</p>
+<b>Q：Codex CLI 提示 base_url 格式错误？</b>
+<p>Codex CLI 要带 <code>/v1</code>，Claude Code 不要带 <code>/v1</code>。这是最高频的坑。</p>
+<b>Q：两边的 key 能混用吗？</b>
+<p>不能，key 是站点级别的。</p>
+<b>Q：担心新站跑路？</b>
+<p>1 元起充的站先充最低额度，跑两周再续。</p>
+</div>
+
+<h2>六、我在用的方案</h2>
+<div class="card">
+<b>DSH API</b>
+<ul>
+<li>端点：<code>https://api.dshapi.icu/v1</code>（Claude Code 填不带 /v1 的根域名）</li>
+<li>一个 base URL 同时支持 OpenAI 三端点与 Anthropic Messages</li>
+<li>QQ 邮箱注册，支付宝 / 微信充值，按量计费，余额不过期</li>
+<li>分组倍率：国模 0.08x，open ai pro 0.22x（后台可见）</li>
+</ul>
+</div>
+
+<div class="qbox">
+  <img src="qr-aff-mjyj.png" alt="DSH API 注册二维码">
+  <div>
+    <b style="font-size:17px;display:block;margin-bottom:8px">扫码直达注册</b>
+    <p style="color:var(--dim);font-size:14.5px;margin:0 0 14px">邮箱注册，支付宝 / 微信充值</p>
+    <a class="cta" href="https://api.dshapi.icu/r/T8KiaeGU">立即注册（邀请码 MJYJ）</a>
+    <a class="cta ghost" href="https://dshapi.icu">裸域名入口</a>
+  </div>
+</div>
+
+<div class="note">
+聚合中转非官方，无企业 SLA。要合规保证请走模型厂商官方 API。我用的是邀请链接，会带来约 10% 返佣。
+</div>
+
+<footer>
+<p>最后更新：2026-10-01 · <a href="index.html">返回主站</a> · <a href="choosing-relay.html">怎么挑中转站</a></p>
+</footer>
+</div>
+</body>
+</html>
