@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI API 中转站怎么选？6 条判断标准 + 5 个 60 秒验证动作（附实测数据）</title>
+<meta name="description" content="挑 AI API 中转站的 6 条硬指标：计费透明、缓存单价、协议覆盖、倍率公开、账单颗粒度、充值门槛。附可直接复制的 curl 验证命令与真实账单拆解。">
+<meta name="keywords" content="AI API中转站,中转站怎么选,API中转站对比,Claude Code中转,Codex CLI配置,API中转站避坑,缓存计费">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/choosing-relay.html">
+<meta property="og:title" content="AI API 中转站怎么选？6 条判断标准 + 5 个验证动作">
+<meta property="og:description" content="不怕贵，怕不透明。教你怎么用 60 秒验证任何一家中转站。">
+<meta property="og:type" content="article">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--card2:#151d3b;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#ffb454}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 90px}
+.wrap{max-width:900px;margin:0 auto}
+header{padding:52px 0 26px}
+.badge{display:inline-block;padding:5px 13px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(25px,4.4vw,40px);line-height:1.32;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16.5px}
+h2{font-size:21px;margin:44px 0 14px;padding-left:13px;border-left:4px solid var(--acc)}
+h3{font-size:17px;margin:26px 0 10px;color:#c9d6ff}
+p{margin:12px 0;color:#d3dbf0}
+ul,ol{margin:12px 0 12px 22px;color:#d3dbf0}
+li{margin:7px 0}
+.cta{display:inline-block;margin:24px 10px 0 0;padding:15px 32px;border-radius:14px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.32)}
+.cta.ghost{background:transparent;border:1px solid var(--line);box-shadow:none;color:var(--txt)}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:16px 0;overflow:hidden;border-radius:12px}
+td,th{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:13.5px;background:#0c1226}
+tr:hover td{background:#0d1428}
+code{background:#0d1428;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:13.5px;color:#a9c6ff}
+pre{position:relative;background:#070b16;border:1px solid var(--line);border-radius:14px;padding:18px 16px;overflow:auto;font:13.5px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff;margin:14px 0}
+.card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0}
+.card b{display:block;font-size:16px;margin-bottom:8px;color:#fff}
+.ok{color:var(--ok)}.warn{color:var(--warn)}
+.grid{display:grid;gap:13px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin:16px 0}
+.mini{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:14px;padding:16px}
+.mini em{font-style:normal;color:var(--acc);font-size:13px;font-weight:700}
+.mini b{display:block;margin:6px 0;font-size:15.5px}
+.mini span{color:var(--dim);font-size:13.5px}
+.faq{margin:14px 0}
+.faq b{display:block;color:#fff;margin:16px 0 4px;font-size:15.5px}
+.faq p{color:var(--dim);font-size:14.5px;margin:0}
+.note{border-left:3px solid var(--warn);padding:10px 16px;background:#14102033;border-radius:0 10px 10px 0;color:#e7d5b8;font-size:14.5px;margin:18px 0}
+.qbox{display:flex;gap:26px;align-items:center;flex-wrap:wrap;background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:18px;padding:24px;margin:30px 0}
+.qbox img{width:180px;border-radius:12px}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--dim);font-size:13.5px}
+a{color:#7fa8ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="badge">AI API 中转站选型指南 · 2026</span>
+  <h1>AI API 中转站怎么选？<br>6 条判断标准 + 5 个 60 秒验证动作</h1>
+  <p class="sub">不怕贵，怕不透明。价签清楚的站，贵一点也能算账；价签模糊的站，便宜也可能吃亏。</p>
+</header>
+
+<h2>一、先给结论：看这 6 条硬指标</h2>
+<table>
+<tr><th>维度</th><th>要看的硬指标</th><th>怎么验证</th></tr>
+<tr><td>计费透明</td><td>返回体是否给出 cache hit / miss 拆分</td><td>发一个请求看 <code>usage</code> 字段</td></tr>
+<tr><td>倍率公开</td><td>分组倍率是否写在后台</td><td>不是写在宣传页，是写在后台「可用渠道」</td></tr>
+<tr><td>缓存单价</td><td>缓存读是否显著低于正常输入</td><td>常见 10%，15%~30% 要留神</td></tr>
+<tr><td>协议覆盖</td><td>同一 base_url 是否同时支持 OpenAI + Anthropic</td><td>分别打 <code>/v1/chat/completions</code> 和 <code>/v1/messages</code></td></tr>
+<tr><td>账单颗粒度</td><td>能否按请求看 token、延迟、实际扣费</td><td>有没有明细导出</td></tr>
+<tr><td>充值门槛</td><td>起充金额、余额是否过期</td><td>起充越低越安全</td></tr>
+</table>
+<div class="card"><b>核心一条</b>成本差异的大头不是标价，而是<b>缓存计价方式</b>。两个站标价差 20%，实测账单可能差 3 倍。</div>
+
+<h2>二、五个 60 秒验证动作（可直接复制）</h2>
+
+<h3>动作 1：无 key 访问，必须返回 401</h3>
+<pre>curl -s -o /dev/null -w "%{http_code}\n" https://你的中转站/v1/models
+# 期望：401。返回 200 说明鉴权形同虚设；返回花哨错误页说明是套壳</pre>
+
+<h3>动作 2：模型清单 vs 定价页是否对得上</h3>
+<pre>curl -s https://你的中转站/v1/models -H "Authorization: Bearer $KEY" | head -c 800</pre>
+
+<h3>动作 3：看 usage 有没有缓存拆分</h3>
+<pre># 关注响应里的这两个字段，没有就是黑盒计费：
+#   prompt_cache_hit_tokens
+#   prompt_cache_miss_tokens</pre>
+
+<h3>动作 4：同一个 prompt 连发两次，第二次必须更便宜</h3>
+<p>这是最狠的验证项。<b>缓存没生效，成本会差出 5~10 倍，而且账单上看不出来。</b>把两次的 <code>usage</code> 和扣费金额对比，差额就是缓存真实生效的证据。</p>
+
+<h3>动作 5：Anthropic 协议单独测一遍</h3>
+<pre>curl -s https://你的中转站/v1/messages \
+  -H "x-api-key: $KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "content-type: application/json" \
+  -d '{"model":"claude-sonnet-4-5","max_tokens":16,
+       "messages":[{"role":"user","content":"hi"}]}'</pre>
+
+<h2>三、成本差在哪：一次真实调用的拆解</h2>
+<table>
+<tr><th>指标</th><th>数值</th><th>说明</th></tr>
+<tr><td>prompt_tokens</td><td>1,755</td><td>总输入</td></tr>
+<tr><td>prompt_cache_hit_tokens</td><td class="ok">1,536（87.5%）</td><td>走缓存读</td></tr>
+<tr><td>prompt_cache_miss_tokens</td><td>219</td><td>按正常输入计价</td></tr>
+<tr><td>completion_tokens</td><td>20</td><td>输出</td></tr>
+</table>
+<p>编程类 Agent（Claude Code、Codex CLI）每一轮都在重发大段系统提示和文件上下文。当输入里 80%+ 走缓存命中时，<b>缓存单价就成了账单的主导项</b>。</p>
+<p>这就解释了为什么「标价低」和「实际便宜」经常是两回事：</p>
+<ul>
+<li>标价低 + 缓存按全价算 → 实测反而贵</li>
+<li>标价中等 + 缓存命中率高 → 实测便宜一大截</li>
+</ul>
+
+<h2>四、一套可复现的实测数据</h2>
+<p>下面是单账号累计数据（来自后台账单，非宣传口径）：</p>
+<table>
+<tr><th>指标</th><th>数值</th></tr>
+<tr><td>累计请求</td><td>30,734 次</td></tr>
+<tr><td>累计 Token</td><td>40.7 亿</td></tr>
+<tr><td>实付</td><td>¥28.67</td></tr>
+<tr><td>平台标准价</td><td>¥359.51</td></tr>
+<tr><td>实付比例</td><td class="ok">7.97%</td></tr>
+</table>
+<p>四端点全通（同一个 base_url）：</p>
+<table>
+<tr><th>端点</th><th>协议</th><th>结果</th><th>耗时</th></tr>
+<tr><td><code>GET /v1/models</code></td><td>OpenAI</td><td class="ok">200</td><td>1.61s</td></tr>
+<tr><td><code>POST /v1/chat/completions</code></td><td>OpenAI</td><td class="ok">200</td><td>2.19s</td></tr>
+<tr><td><code>POST /v1/responses</code></td><td>OpenAI Responses</td><td class="ok">200</td><td>2.37s</td></tr>
+<tr><td><code>POST /v1/messages</code></td><td>Anthropic</td><td class="ok">200</td><td>3.94s</td></tr>
+</table>
+<p>不带 key 访问 <code>/v1/models</code> 返回 401。</p>
+
+<h2>五、避坑清单</h2>
+<ol>
+<li><b>别大额充值。</b>这行业不稳定，充够一个月用量就行。</li>
+<li><b>警惕异常低价。</b>明显低于成本价的，大概率拿便宜模型顶替高价模型。</li>
+<li><b>看缓存单价。</b>收 30% 缓存费的和收 10% 的，一个月能差出一倍账单。</li>
+<li><b>要明细账单。</b>出问题时能查到具体哪一笔，比客服态度重要。</li>
+<li><b>先小额试。</b>1 元起充的站优先。</li>
+</ol>
+
+<h2>六、常见问题</h2>
+<div class="faq">
+<b>Q：换站之后 Claude Code 报模型不存在？</b>
+<p>模型名要跟实际能调的清单一致。先 <code>curl /v1/models</code> 拿到确切名字再填。</p>
+<b>Q：Codex CLI 提示 base_url 格式错误？</b>
+<p>Codex CLI 要求带 <code>/v1</code>，Claude Code 要求不带 <code>/v1</code>。这是最常见的坑。</p>
+<b>Q：两边的 key 能混用吗？</b>
+<p>不能。key 是站点级别的，换站必须换 key。</p>
+<b>Q：担心跑路怎么办？</b>
+<p>小额试。先充最低额度跑两周，够用再续。</p>
+</div>
+
+<h2>七、我在用的方案</h2>
+<div class="card">
+<b>DSH API</b>
+<p>上面第四节的数据就是它。一个 base URL 同时支持 OpenAI 三端点与 Anthropic Messages。</p>
+<ul>
+<li>端点：<code>https://api.dshapi.icu/v1</code></li>
+<li>注册：QQ 邮箱即可，不需要海外卡</li>
+<li>支付：支付宝 / 微信，按量计费，余额不过期</li>
+<li>分组倍率：国模 0.08x，open ai pro 0.22x（后台可见）</li>
+<li>邀请返佣 10%，无冻结无上限</li>
+</ul>
+</div>
+
+<div class="qbox">
+  <img src="qr-aff-mjyj.png" alt="DSH API 注册二维码">
+  <div>
+    <b style="font-size:17px;display:block;margin-bottom:8px">扫码直达注册</b>
+    <p style="color:var(--dim);font-size:14.5px;margin:0 0 14px">邮箱注册，支付宝 / 微信充值，按量计费</p>
+    <a class="cta" href="https://api.dshapi.icu/r/T8KiaeGU">立即注册（邀请码 MJYJ）</a>
+    <a class="cta ghost" href="https://dshapi.icu">裸域名入口</a>
+  </div>
+</div>
+
+<div class="note">
+这是聚合中转，不是模型厂商官方。要企业 SLA、要数据驻留保证的，走官方 API。我用的是邀请链接，会带来约 10% 返佣；裸域名行为完全一致。
+</div>
+
+<footer>
+<p>最后更新：2026-10-01 · <a href="index.html">返回主站</a></p>
+<p>本文数据来自真实调用与后台账单，可复现。</p>
+</footer>
+</div>
+</body>
+</html>
