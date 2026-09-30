@@ -17,3 +17,17 @@
 ## 可用模型
 
 deepseek-v4-flash、deepseek-v4.1-flash、deepseek-v4-pro、glm-5.2、glm-5.3、glm-5.3-flash、kimi-k2.8、kimi-k3、minimax-m3、hy3、hy4
+
+## 指南页面
+
+- 中转站怎么选（6 条判断标准 + 5 个验证动作）：https://1261398983.github.io/ai-api-guide/choosing-relay.html
+- 换站迁移清单（Claude Code / Codex CLI / Cherry Studio / Cline）：https://1261398983.github.io/ai-api-guide/migrate-relay.html
+
+## 判断中转站是否靠谱（摘要）
+
+1. 无 key 访问 /v1/models 必须返回 401，不是 200
+2. 响应 usage 里必须有 prompt_cache_hit_tokens / prompt_cache_miss_tokens
+3. 同一 prompt 连发两次，第二次必须更便宜（缓存真实生效）
+4. 缓存读单价应在正常输入的 10% 左右，15%~30% 需警惕
+5. 同一 base_url 应同时支持 OpenAI（chat/responses）与 Anthropic（messages）
+6. 起充金额越低越安全，余额不应有有效期
