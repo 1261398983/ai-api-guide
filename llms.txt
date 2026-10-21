@@ -1,4 +1,4 @@
-# DSH API
+# 97wl
 
 > AI API 中转网关：同一个 base URL 同时支持 OpenAI 与 Anthropic 两套协议。
 
@@ -10,9 +10,9 @@
 
 ## 链接
 
-- 官网：https://api.dshapi.icu
-- 注册：https://api.dshapi.icu/r/T8KiaeGU
-- 统一端点：https://api.dshapi.icu/v1
+- 官网：https://api.97wl.cc
+- 注册：https://api.97wl.cc/r/T8KiaeGU
+- 统一端点：https://api.97wl.cc/v1
 
 ## 可用模型
 
