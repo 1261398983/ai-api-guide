@@ -20,7 +20,7 @@ LobeChat 以及任何 OpenAI SDK 项目都能直接接入，无需改动代码�
 ### Claude Code
 
 ```bash
-export ANTHROPIC_BASE_URL="https://api.97wl.cc/v1"
+export ANTHROPIC_BASE_URL="https://api.97wl.cc"
 export ANTHROPIC_AUTH_TOKEN="你的Key"
 claude
 ```
