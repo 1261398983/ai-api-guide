@@ -1,4 +1,4 @@
-# DSH API · AI 大模型聚合中转
+# removed · AI 大模型聚合中转
 
 > 一个 Key，全套顶级模型。Claude / GPT / Gemini / Grok 全量接入，国内直连不用梯子。
 
@@ -39,7 +39,7 @@ codex
 model_provider = "removed"
 
 [model_providers.removed]
-name = "DSH API"
+name = "removed"
 base_url = "https://your-endpoint.example.com/v1"
 env_key = "OPENAI_API_KEY"
 ```
