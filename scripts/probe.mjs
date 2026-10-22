@@ -64,7 +64,11 @@ function summarize(records) {
     const up = list.filter(r => r.ok).length;
     const lat = list.filter(r => r.ok).map(r => r.dir.ms).sort((a, b) => a - b);
     const avg = lat.length ? Math.round(lat.reduce((a, b) => a + b, 0) / lat.length) : null;
-    const p95 = lat.length ? lat[Math.floor(lat.length * 0.95) - 1] ?? lat[lat.length - 1] : null;
+    let p95 = null;
+    if (lat.length) {
+      const idx = Math.min(lat.length - 1, Math.max(0, Math.ceil(lat.length * 0.95) - 1));
+      p95 = lat[idx];
+    }
     return {
       total: list.length,
       up,
