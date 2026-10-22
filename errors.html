@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI API 错误码完全对照表：401 / 402 / 429 / 500 逐个排查（附 curl 命令）</title>
+<meta name="description" content="RELAY X 逆向工程 API 网关。AI API 调用失败的完整排查手册：401 鉴权、402 余额、403 地区、404 路径、413 体积、429 限流、500/502/503/504 上游故障、529 过载。每个错误码给出症状、根因、验证命令与修法。">
+<meta name="keywords" content="API 错误码,401 Unauthorized,429 Too Many Requests,insufficient_quota,claude api 报错,openai api 403,api 504 超时,中转站 报错">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/errors.html">
+<meta property="og:title" content="AI API 错误码完全对照表：401 / 402 / 429 / 500 逐个排查（附 curl 命令）">
+<meta property="og:description" content="RELAY X 逆向工程 API 网关。AI API 调用失败的完整排查手册：401 鉴权、402 余额、403 地区、404 路径、413 体积、429 限流、500/502/503/504 上游故障、529 过载。每个错误码给出症状、根因、验证命令与修法。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/errors.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--card2:#151d3b;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#ffb454}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 90px}
+.wrap{max-width:900px;margin:0 auto}
+header{padding:52px 0 26px}
+.badge{display:inline-block;padding:5px 13px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(25px,4.4vw,40px);line-height:1.32;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16.5px}
+h2{font-size:21px;margin:44px 0 14px;padding-left:13px;border-left:4px solid var(--acc)}
+h3{font-size:17px;margin:26px 0 10px;color:#c9d6ff}
+p{margin:12px 0;color:#d3dbf0}
+ul,ol{margin:12px 0 12px 22px;color:#d3dbf0}
+li{margin:7px 0}
+.cta{display:inline-block;margin:24px 10px 0 0;padding:15px 32px;border-radius:14px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.32)}
+.cta.ghost{background:transparent;border:1px solid var(--line);box-shadow:none;color:var(--txt)}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:16px 0;overflow:hidden;border-radius:12px}
+td,th{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:13.5px;background:#0c1226}
+tr:hover td{background:#0d1428}
+code{background:#0d1428;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:13.5px;color:#a9c6ff}
+pre{position:relative;background:#070b16;border:1px solid var(--line);border-radius:14px;padding:18px 16px;overflow:auto;font:13.5px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff;margin:14px 0}
+.card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0}
+.card b{display:block;font-size:16px;margin-bottom:8px;color:#fff}
+.ok{color:var(--ok)}.warn{color:var(--warn)}
+.grid{display:grid;gap:13px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin:16px 0}
+.mini{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:14px;padding:16px}
+.mini em{font-style:normal;color:var(--acc);font-size:13px;font-weight:700}
+.mini b{display:block;margin:6px 0;font-size:15.5px}
+.mini span{color:var(--dim);font-size:13.5px}
+.faq{margin:14px 0}
+.faq b{display:block;color:#fff;margin:16px 0 4px;font-size:15.5px}
+.faq p{color:var(--dim);font-size:14.5px;margin:0}
+.note{border-left:3px solid var(--warn);padding:10px 16px;background:#14102033;border-radius:0 10px 10px 0;color:#e7d5b8;font-size:14.5px;margin:18px 0}
+.qbox{display:flex;gap:26px;align-items:center;flex-wrap:wrap;background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:18px;padding:24px;margin:30px 0}
+.qbox img{width:180px;border-radius:12px}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--dim);font-size:13.5px}
+a{color:#7fa8ff}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"AI API 错误码完全对照表：401 / 402 / 429 / 500 逐个排查（附 curl 命令）","description":"RELAY X 逆向工程 API 网关。AI API 调用失败的完整排查手册：401 鉴权、402 余额、403 地区、404 路径、413 体积、429 限流、500/502/503/504 上游故障、529 过载。每个错误码给出症状、根因、验证命令与修法。","inLanguage":"zh-CN","url":"https://1261398983.github.io/ai-api-guide/errors.html","isPartOf":{"@type":"WebSite","name":"RELAY X 配置指南","url":"https://1261398983.github.io/ai-api-guide/"}}</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="badge">API 排错手册 · 2026</span>
+  <h1>AI API 错误码完全对照表<br>401 / 402 / 429 / 500 逐个排查</h1>
+  <p class="sub">报错信息不会告诉你该改哪里。这张表会——每个错误码都给出症状、根因、验证命令和修法。</p>
+</header>
+
+<h2>先看这张速查表</h2>
+<table>
+<tr><th>状态码</th><th>最常见的原因</th><th>先查这个</th></tr>
+<tr><td><code>401</code></td><td>变量名写错 / key 失效</td><td><code>echo $ANTHROPIC_AUTH_TOKEN</code></td></tr>
+<tr><td><code>402</code></td><td>余额不足</td><td>控制台余额</td></tr>
+<tr><td><code>403</code></td><td>地区限制 / 密钥权限不足</td><td>密钥分组与 IP 白名单</td></tr>
+<tr><td><code>404</code></td><td>base_url 带没带 <code>/v1</code></td><td>请求的实际 URL</td></tr>
+<tr><td><code>413</code></td><td>单次请求体过大</td><td>上下文长度</td></tr>
+<tr><td><code>429</code></td><td>限流 <b>或</b> 额度耗尽（两者完全不同）</td><td>响应体里的 <code>type</code></td></tr>
+<tr><td><code>500/502/503/504</code></td><td>上游故障，不是你写错了</td><td>换模型或等几分钟</td></tr>
+<tr><td><code>529</code></td><td>上游过载（Anthropic 专有）</td><td>降低并发</td></tr>
+</table>
+
+<div class="note">
+先记住一条：<b>401 和 429 是最高频的两个错误，占了新手问题的八成。</b>先把这两节读完，剩下的按需查。
+</div>
+
+<h2>401 Unauthorized —— 九成是变量名写错</h2>
+
+<h3>症状</h3>
+<pre>{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}</pre>
+<p>或者更模糊的：</p>
+<pre>Error: 401 {"code":"INVALID_API_KEY","message":"Invalid API key"}</pre>
+
+<h3>根因排序</h3>
+<table>
+<tr><th>#</th><th>原因</th><th>怎么确认</th></tr>
+<tr><td>1</td><td>变量名写错：[CC] 读 <code>ANTHROPIC_AUTH_TOKEN</code>，不是 <code>ANTHROPIC_API_KEY</code></td><td>看下面的检查命令</td></tr>
+<tr><td>2</td><td>值里带了空格或引号</td><td><code>echo</code> 出来看长度</td></tr>
+<tr><td>3</td><td>写在 <code>.bashrc</code> 但没 <code>source</code></td><td>新开终端再 echo</td></tr>
+<tr><td>4</td><td>key 被吊销 / 过期</td><td>控制台看密钥状态</td></tr>
+<tr><td>5</td><td>复制时漏了 <code>sk-</code> 前缀</td><td>长度对比</td></tr>
+</table>
+
+<h3>验证命令</h3>
+<pre># Linux / macOS
+echo "[$ANTHROPIC_AUTH_TOKEN]"
+echo "${#ANTHROPIC_AUTH_TOKEN}"     # 长度，正常 40+ 或 100+
+
+# Windows PowerShell
+echo "[$env:ANTHROPIC_AUTH_TOKEN]"
+($env:ANTHROPIC_AUTH_TOKEN).Length</pre>
+
+<p>方括号是为了看有没有首尾空格。<b>一个尾随空格就能让 key 失效。</b></p>
+
+<h3>直接用 curl 排除客户端问题</h3>
+<pre>curl https://api.97wl.cc/v1/models \
+  -H "Authorization: Bearer sk-你的密钥"</pre>
+<p>curl 能通、客户端不通 → 是客户端变量名的问题，不是 key 的问题。</p>
+
+<h2>402 / insufficient_quota —— 余额与额度的区别</h2>
+
+<h3>两种完全不同的 402</h3>
+<table>
+<tr><th>响应体关键字段</th><th>含义</th><th>修法</th></tr>
+<tr><td><code>insufficient_quota</code></td><td>账户额度用完了</td><td>充值</td></tr>
+<tr><td><code>billing_hard_limit_reached</code></td><td>碰到你设的消费上限</td><td>调高上限，或等下月</td></tr>
+<tr><td><code>insufficient_user_quota</code></td><td>中转站侧余额不足</td><td>站内充值</td></tr>
+</table>
+
+<div class="note">
+<b>注意：很多站把额度耗尽也返回 429，不是 402。</b>看到 429 先看响应体的 <code>type</code>，不要一上来就降并发。
+</div>
+
+<h2>403 Forbidden —— 三个不同来源</h2>
+
+<table>
+<tr><th>来源</th><th>典型响应</th><th>修法</th></tr>
+<tr><td>地区限制</td><td><code>country, region, or territory not supported</code></td><td>换出口节点；中转站一般已处理</td></tr>
+<tr><td>密钥权限</td><td><code>permission denied for this model</code></td><td>密钥绑定的分组里没有这个模型</td></tr>
+<tr><td>IP 白名单</td><td><code>ip not allowed</code></td><td>把当前出口 IP 加进白名单，或关掉白名单</td></tr>
+</table>
+
+<p>第三项最容易踩：给密钥开了 IP 白名单，然后换了网络（比如从家里切到公司），所有请求都 403。</p>
+
+<h2>404 Not Found —— 几乎都是 base_url 的问题</h2>
+
+<h3>最经典的一个错误</h3>
+<table>
+<tr><th>客户端</th><th>base_url 应该写</th></tr>
+<tr><td>[CC]（Anthropic 协议）</td><td><code>https://api.example.com</code> &nbsp;<b>不带 /v1</b></td></tr>
+<tr><td>[OI] SDK / Cursor / Cherry Studio</td><td><code>https://api.example.com/v1</code> &nbsp;<b>带 /v1</b></td></tr>
+</table>
+
+<p>写反了就是 404。因为：</p>
+<ul>
+<li>Anthropic 协议自己拼 <code>/v1/messages</code>，你带 <code>/v1</code> 就变成 <code>/v1/v1/messages</code></li>
+<li>[OI] SDK 自己拼 <code>/chat/completions</code>，你不带 <code>/v1</code> 就变成 <code>/chat/completions</code></li>
+</ul>
+
+<h3>另一种 404：模型名不存在</h3>
+<pre>{"error":{"message":"model not found: gpt-4o-latest","type":"invalid_request_error"}}</pre>
+<p>先拉模型列表对一遍：</p>
+<pre>curl https://api.example.com/v1/models \
+  -H "Authorization: Bearer sk-你的密钥" | grep -o '"id":"[^"]*"'</pre>
+
+<h2>413 Payload Too Large</h2>
+<p>单次请求体超过服务端上限。中转站的上限通常比官方低（因为要过一层反代）。</p>
+<ul>
+<li>检查 Nginx 的 <code>client_max_body_size</code>（默认只有 1M）</li>
+<li>长文档先切分再逐段处理</li>
+<li>图片走多模态接口而不是 base64 塞进文本</li>
+</ul>
+
+<h2>429 Too Many Requests —— 分清楚是哪一种</h2>
+
+<h3>先看响应体</h3>
+<pre># 情况 A：真限流
+{"error":{"type":"rate_limit_error","message":"Rate limit reached for requests"}}
+
+# 情况 B：额度耗尽（伪装成 429）
+{"error":{"type":"insufficient_quota","message":"You exceeded your current quota"}}
+
+# 情况 C：并发超限
+{"error":{"type":"rate_limit_error","message":"concurrent requests limit exceeded"}}</pre>
+
+<table>
+<tr><th>类型</th><th>修法</th></tr>
+<tr><td>A 请求频率</td><td>降 QPS，加退避重试（指数退避 + 抖动）</td></tr>
+<tr><td>B 额度</td><td>充值，降并发没用</td></tr>
+<tr><td>C 并发</td><td>降 <code>--concurrency</code>，或用队列串行</td></tr>
+</table>
+
+<h3>正确的重试写法</h3>
+<pre>async function withRetry(fn, max = 4) {
+  for (let i = 0; i &lt; max; i++) {
+    try { return await fn(); }
+    catch (e) {
+      if (e.status !== 429 &amp;&amp; e.status &lt; 500) throw e;
+      const base = Math.min(8000, 500 * 2 ** i);
+      const jitter = Math.random() * 300;
+      await new Promise(r =&gt; setTimeout(r, base + jitter));
+    }
+  }
+  throw new Error('retries exhausted');
+}</pre>
+
+<p><b>不要对 400/401/402/403/404 重试</b>——这些是确定性错误，重试只会浪费额度。</p>
+
+<h2>500 / 502 / 503 / 504 —— 上游的问题</h2>
+
+<table>
+<tr><th>码</th><th>含义</th><th>该做什么</th></tr>
+<tr><td>500</td><td>上游内部错误</td><td>重试；持续出现就换模型</td></tr>
+<tr><td>502</td><td>网关收到无效响应</td><td>同上，通常几秒内自愈</td></tr>
+<tr><td>503</td><td>上游暂时不可用</td><td>等 30 秒再试</td></tr>
+<tr><td>504</td><td>网关等待超时</td><td>缩短请求、降低 max_tokens</td></tr>
+</table>
+
+<h3>504 的特殊处理</h3>
+<p>504 往往不是上游慢，而是<b>你的反代超时比上游短</b>。Nginx 默认 <code>proxy_read_timeout</code> 是 60 秒，长输出很容易超。</p>
+<pre>location /v1/ {
+    proxy_read_timeout 300s;
+    proxy_send_timeout 300s;
+    proxy_buffering off;      # 流式响应必须关
+}</pre>
+
+<h2>529 Overloaded（Anthropic 专有）</h2>
+<pre>{"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}</pre>
+<p>Anthropic 服务端过载。不是你的问题，也不扣费。处理方式：</p>
+<ul>
+<li>指数退避重试（1s → 2s → 4s → 8s）</li>
+<li>降低并发，不要硬刷</li>
+<li>持续 529 说明这个时段上游紧张，换时段或换模型</li>
+</ul>
+
+<h2>模型侧错误（HTTP 200 但内容异常）</h2>
+
+<table>
+<tr><th>字段</th><th>含义</th><th>修法</th></tr>
+<tr><td><code>stop_reason: "max_tokens"</code></td><td>输出被截断</td><td>调大 <code>max_tokens</code></td></tr>
+<tr><td><code>stop_reason: "length"</code></td><td>同上（[OI] 风格）</td><td>同上</td></tr>
+<tr><td><code>context_length_exceeded</code></td><td>输入超上下文</td><td>切分历史，开新会话</td></tr>
+<tr><td><code>content_filter</code></td><td>内容被拦</td><td>改写提示词</td></tr>
+</table>
+
+<h2>一个 30 秒的自检脚本</h2>
+<pre>#!/usr/bin/env bash
+# 依次验证：连通 → 鉴权 → 模型 → 对话
+BASE="${1:-https://api.97wl.cc}"
+KEY="${2:?usage: check.sh BASE KEY}"
+
+echo "1) 连通性"
+curl -s -o /dev/null -w "  HTTP %{http_code}  %{time_total}s\n" "$BASE/"
+
+echo "2) 鉴权"
+curl -s -o /dev/null -w "  HTTP %{http_code}\n" "$BASE/v1/models" \
+  -H "Authorization: Bearer $KEY"
+
+echo "3) 对话"
+curl -s "$BASE/v1/chat/completions" \
+  -H "Authorization: Bearer $KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"你的模型名","messages":[{"role":"user","content":"hi"}],"max_tokens":8}' \
+  | head -c 300
+echo</pre>
+
+<p>三步分别失败，就分别对应：网络问题、key 问题、模型或参数问题。</p>
+
+<h2>还是不通怎么办</h2>
+<p>把这几样一起发给客服，能省掉三轮来回：</p>
+<ul>
+<li>完整报错原文（含状态码和响应体）</li>
+<li>你用的客户端和版本</li>
+<li>实际请求的完整 URL（把 key 打码）</li>
+<li><code>curl -v</code> 的输出（含请求头，key 打码）</li>
+</ul>
+
+<div class="qbox">
+  <div style="flex:1;min-width:240px">
+    <b style="display:block;font-size:18px;margin-bottom:8px">想直接验证一个端点是否正常？</b>
+    <span style="color:var(--dim);font-size:14.5px">本站有一个检测器，输入端点就能生成上面这些测试命令，并把返回的 JSON 自动分析出结论。</span>
+    <div style="margin-top:16px">
+      <a class="cta" href="https://api.97wl.cc/register">RELAY X 注册 →</a>
+      <a class="cta ghost" href="checker/">打开检测器</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  RELAY X · 逆向工程 API 网关<br>
+  <a href="https://1261398983.github.io/ai-api-guide/">配置指南</a> ·
+  <a href="https://1261398983.github.io/ai-api-guide/calc/">费用计算器</a> ·
+  <a href="https://1261398983.github.io/ai-api-guide/checker/">中转站检测器</a> ·
+  <a href="https://1261398983.github.io/ai-api-guide/choosing-relay.html">中转站怎么选</a> ·
+  <a href="https://1261398983.github.io/ai-api-guide/migrate-relay.html">迁移清单</a> ·
+  <a href="https://1261398983.github.io/ai-api-guide/status/">服务状态</a><br>
+  <span style="opacity:.7">本页内容为公开技术资料整理，不构成对任何服务商的价格承诺。实际计费以各站控制台为准。</span>
+</footer>
+</div>
+</body>
+</html>
