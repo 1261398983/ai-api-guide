@@ -2,7 +2,7 @@ name: Probe relay status
 
 on:
   schedule:
-    # 每 30 分钟探测一次（GitHub 的 cron 可能有几分钟延迟，正常）
+    # 每小时探测一次（分钟取 7，避开整点的调度高峰）
     - cron: '7 * * * *'
   workflow_dispatch:
 
