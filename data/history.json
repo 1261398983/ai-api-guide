@@ -51,28 +51,28 @@
       "ok": true
     }
   ],
-  "updatedAt": "2026-10-22T04:26:17.130Z",
+  "updatedAt": "2026-10-22T04:31:06.720Z",
   "summary": {
     "h24": {
       "total": 3,
       "up": 3,
       "uptime": 100,
       "avgMs": 733,
-      "p95Ms": 479
+      "p95Ms": 1456
     },
     "d7": {
       "total": 3,
       "up": 3,
       "uptime": 100,
       "avgMs": 733,
-      "p95Ms": 479
+      "p95Ms": 1456
     },
     "d30": {
       "total": 3,
       "up": 3,
       "uptime": 100,
       "avgMs": 733,
-      "p95Ms": 479
+      "p95Ms": 1456
     }
   }
 }
