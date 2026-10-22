@@ -468,6 +468,11 @@ function analyze() {
     }
   }
 
+  // 兜底：只要有一条警告级检查，总判定不能是 ok
+  if (verdict === 'ok' && checks.some(c => c.m === 'w')) {
+    verdict = 'warn';
+  }
+
   // 渲染
   const cls = verdict === 'ok' ? 'ok' : verdict === 'warn' ? 'warn' : 'bad';
   const title = verdict === 'ok' ? '基础检查通过' : verdict === 'warn' ? '有几处需要进一步确认' : '发现明确问题';
