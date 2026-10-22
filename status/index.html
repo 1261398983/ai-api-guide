@@ -85,6 +85,33 @@ code{background:#0a1424;padding:2px 6px;border-radius:4px;font-size:13px}
     </tbody>
   </table>
 
+  <h2>嵌入状态徽章</h2>
+  <p class="lead" style="font-size:14px">
+    这个徽章由每次探测自动重新生成，数据实时反映当前状态。可以放进 README、博客或监控面板：
+  </p>
+  <p style="margin:16px 0"><img src="../status.svg" alt="RELAY X 状态" height="20"></p>
+
+  <table>
+    <tbody>
+      <tr>
+        <th style="width:110px">Markdown</th>
+        <td><code id="md">![status](https://1261398983.github.io/ai-api-guide/status.svg)</code>
+        <button class="btn" style="margin-left:8px;padding:4px 12px;font-size:13px" onclick="copyIt('md')">复制</button></td>
+      </tr>
+      <tr>
+        <th>HTML</th>
+        <td><code id="html">&lt;img src="https://1261398983.github.io/ai-api-guide/status.svg" alt="RELAY X status" /&gt;</code>
+        <button class="btn" style="margin-left:8px;padding:4px 12px;font-size:13px" onclick="copyIt('html')">复制</button></td>
+      </tr>
+      <tr>
+        <th>仅 JSON</th>
+        <td><a href="../data/history.json">data/history.json</a> —— 原始探测记录，可自行分析</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="lead" style="font-size:13px;margin-top:12px">
+    颜色含义：<span class="ok">绿</span> 24h 可用率 ≥ 99% · <span class="warnc">黄</span> 95–99% · <span class="bad">红</span> &lt; 95% · 灰 无数据
+  </p>
   <h2>这份数据不能说明什么</h2>
   <p class="lead" style="font-size:14px">
     不能说明中国大陆延迟；不能说明模型质量（是否有降智、是否替换模型）；
@@ -103,6 +130,16 @@ code{background:#0a1424;padding:2px 6px;border-radius:4px;font-size:13px}
 </div></footer>
 
 <script>
+function copyIt(id){
+  const t = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(t).then(() => {
+    const b = event.target;
+    const o = b.textContent;
+    b.textContent = '已复制';
+    setTimeout(() => b.textContent = o, 1200);
+  });
+}
+
 const $ = s => document.querySelector(s);
 
 function fmtTime(iso){
