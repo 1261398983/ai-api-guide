@@ -142,9 +142,13 @@ a{color:var(--a)}
         </label>
       </div>
       <div class="row">
-        <input type="text" id="expectModelName" value="claude-sonnet-4-5" placeholder="请求的模型名" style="max-width:280px">
+        <input type="text" id="expectModelName" value="claude-sonnet-4-5" placeholder="请求的模型名" style="max-width:240px">
+        <input type="number" id="expectInTok" placeholder="预期输入 token（可选）" style="max-width:220px">
         <button class="btn" id="analyzeBtn">开始分析</button>
       </div>
+      <p class="hint" style="margin-top:10px;margin-bottom:0">
+        填了「预期输入 token」才会做 token 计数核对。跑测试 2 时，那段固定英文预期在 200–260 之间。
+      </p>
       <div id="analysisOut"></div>
     </div>
   </div>
@@ -442,18 +446,24 @@ function analyze() {
     verdict = 'bad';
   }
 
-  // 6. 可疑 token 数（测试 2 用的是固定 900 字符英文）
+  // 6. token 计数核对（仅在用户填了预期值时才做）
   if (u) {
     const inTok = u.prompt_tokens ?? u.input_tokens;
-    if (typeof inTok === 'number' && inTok > 800 && inTok < 5000) {
-      if (inTok >= 200 && inTok <= 260) {
-        checks.push({ m: 'p', t: `token 计数与官方量级吻合（${inTok}，预期 200–260）` });
-      } else if (inTok > 260 && inTok <= 320) {
-        checks.push({ m: 'w', t: `token 计数偏高（${inTok}，预期 200–260）— 可能中文分词差异，也可能轻微虚报` });
+    const expect = parseFloat($('expectInTok').value);
+    if (typeof inTok === 'number' && !isNaN(expect) && expect > 0) {
+      const ratio = inTok / expect;
+      const pct = Math.round((ratio - 1) * 100);
+      if (ratio >= 0.85 && ratio <= 1.15) {
+        checks.push({ m: 'p', t: `token 计数吻合：实报 ${inTok}，预期 ${expect}（偏差 ${pct}%）` });
+      } else if (ratio > 1.15 && ratio <= 1.4) {
+        checks.push({ m: 'w', t: `token 计数偏高：实报 ${inTok}，预期 ${expect}（<strong>多报 ${pct}%</strong>）— 可能是分词差异，也可能轻微虚报` });
         if (verdict === 'ok') verdict = 'warn';
-      } else if (inTok > 320) {
-        checks.push({ m: 'f', t: `token 计数明显虚高（${inTok}，预期 200–260）— 超出 ${Math.round((inTok/230-1)*100)}%` });
+      } else if (ratio > 1.4) {
+        checks.push({ m: 'f', t: `token 计数明显虚高：实报 ${inTok}，预期 ${expect}（<strong>多报 ${pct}%</strong>）— 按这个比例你的账单会被系统性放大` });
         verdict = 'bad';
+      } else {
+        checks.push({ m: 'w', t: `token 计数偏低：实报 ${inTok}，预期 ${expect}（少 ${Math.abs(pct)}%）— 少见，确认下你的预期值是否填对` });
+        if (verdict === 'ok') verdict = 'warn';
       }
     }
   }
