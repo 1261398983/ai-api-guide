@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI API 费用计算器 · 算清你每月真实花多少钱 — RELAY X</title>
+<meta name="description" content="输入你的调用量、输入输出 token 和单价，立刻算清每月真实花费。含官方直连 vs 中转对比、任务分级能省多少、输出 token 是输入 5 倍的成本陷阱。">
+<meta name="keywords" content="AI API 费用计算,Claude API 价格计算,token 成本计算,gpt api 一个月多少钱,API 用量估算,中转站 省钱">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/calc/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI API 费用计算器 · 算清你每月真实花多少钱">
+<meta property="og:description" content="输入调用量与 token 单价，立刻算清每月真实花费。含任务分级省钱测算与输出 token 陷阱说明。">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/calc/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<style>
+:root{--bg:#0b0e13;--p:#141922;--p2:#1a2029;--line:#242c39;--fg:#e7eef8;--dim:#8695aa;--a:#4d9fff;--g:#2ad39b;--y:#ffb020;--r:#ff5c5c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line);padding:18px 0;position:sticky;top:0;background:rgba(11,14,19,.92);backdrop-filter:blur(12px);z-index:10}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:.5px}
+.brand span{color:var(--a)}
+.cta{background:var(--a);color:#06121f;padding:8px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap}
+.cta:hover{filter:brightness(1.1)}
+h1{font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.35;margin:40px 0 14px;letter-spacing:-.02em}
+.sub{color:var(--dim);font-size:1.02rem;margin-bottom:34px}
+.card{background:var(--p);border:1px solid var(--line);border-radius:14px;padding:26px;margin-bottom:22px}
+.card h2{font-size:1.1rem;margin-bottom:18px;display:flex;align-items:center;gap:9px}
+.card h2::before{content:"";width:3px;height:17px;background:var(--a);border-radius:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+label{display:block;font-size:13px;color:var(--dim);margin-bottom:6px}
+input[type=number]{width:100%;background:var(--p2);border:1px solid var(--line);border-radius:9px;padding:11px 13px;color:var(--fg);font-size:15px;font-variant-numeric:tabular-nums}
+input[type=number]:focus{outline:none;border-color:var(--a)}
+.result{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:22px;padding-top:22px;border-top:1px dashed var(--line)}
+.stat{background:var(--p2);border-radius:11px;padding:15px 16px}
+.stat b{display:block;font-size:1.65rem;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat span{font-size:12px;color:var(--dim)}
+.big b{color:var(--g)}
+.warn b{color:var(--y)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{color:var(--dim);font-weight:500;font-size:12.5px}
+td:last-child,th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.note{background:rgba(255,176,32,.07);border-left:3px solid var(--y);padding:13px 16px;border-radius:0 8px 8px 0;font-size:14px;color:#d9c49a;margin-top:16px}
+.tip{background:rgba(45,211,155,.07);border-left:3px solid var(--g);padding:13px 16px;border-radius:0 8px 8px 0;font-size:14px;color:#9fd9c4;margin-top:16px}
+code{background:var(--p2);padding:2px 7px;border-radius:5px;font-size:.88em;color:#a8c8ff}
+footer{border-top:1px solid var(--line);margin-top:50px;padding:28px 0 50px;color:var(--dim);font-size:13px}
+a{color:var(--a)}
+.range{width:100%;margin-top:8px;accent-color:var(--a)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">RELAY <span>X</span> · 逆向工程中转站</div>
+    <a class="cta" href="https://api.97wl.cc/">打开站点 →</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>AI API 费用计算器</h1>
+  <p class="sub">填你的实际用量，算清一个月到底要花多少钱。所有单价你自己填——本站不转载任何来源不明的报价。</p>
+
+  <div class="card">
+    <h2>1. 你的用量</h2>
+    <div class="grid">
+      <div>
+        <label>每次调用平均输入 token</label>
+        <input type="number" id="inTok" value="2000" min="1" step="100">
+      </div>
+      <div>
+        <label>每次调用平均输出 token</label>
+        <input type="number" id="outTok" value="600" min="1" step="100">
+      </div>
+      <div>
+        <label>每天调用次数</label>
+        <input type="number" id="perDay" value="50" min="0" step="5">
+      </div>
+      <div>
+        <label>每月有效工作日</label>
+        <input type="number" id="days" value="22" min="1" max="31">
+      </div>
+      <div>
+        <label>输入单价（元 / 百万 token）</label>
+        <input type="number" id="inPrice" value="21" min="0" step="0.1">
+      </div>
+      <div>
+        <label>输出单价（元 / 百万 token）</label>
+        <input type="number" id="outPrice" value="105" min="0" step="0.1">
+      </div>
+    </div>
+    <div class="result">
+      <div class="stat"><b id="rDay">—</b><span>每天花费（元）</span></div>
+      <div class="stat big"><b id="rMonth">—</b><span>每月花费（元）</span></div>
+      <div class="stat"><b id="rTok">—</b><span>每月消耗 token</span></div>
+      <div class="stat warn"><b id="rRatio">—</b><span>输出占用的花费</span></div>
+    </div>
+    <div class="note" id="ratioNote"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. 任务分级能省多少</h2>
+    <p style="color:var(--dim);font-size:14px;margin-bottom:14px">
+      把简单任务（写注释、改名、格式化）从顶配模型换到便宜档，通常不影响质量。
+    </p>
+    <label>简单任务占比：<strong id="simpleVal">45%</strong></label>
+    <input type="range" class="range" id="simpleRatio" min="0" max="90" value="45" step="5">
+    <label style="margin-top:16px">便宜档单价相对顶配的折扣</label>
+    <input type="range" class="range" id="cheapRatio" min="5" max="90" value="20" step="5">
+    <div style="font-size:13px;color:var(--dim);margin-top:6px">当前：<strong id="cheapVal">20%</strong>（即顶配的 2 折）</div>
+    <div class="result">
+      <div class="stat"><b id="rBefore">—</b><span>不分级（元/月）</span></div>
+      <div class="stat big"><b id="rAfter">—</b><span>分级后（元/月）</span></div>
+      <div class="stat warn"><b id="rSave">—</b><span>每月省下</span></div>
+    </div>
+    <div class="tip">这个动作不需要换渠道，改的是调用习惯。它通常比"找更便宜的站"省得更多。</div>
+  </div>
+
+  <div class="card">
+    <h2>3. 为什么输出 token 这么贵</h2>
+    <table>
+      <thead><tr><th>对比项</th><th>典型情况</th></tr></thead>
+      <tbody>
+        <tr><td>输出单价 / 输入单价</td><td>3 – 5 倍</td></tr>
+        <tr><td>你的输出 token 占比</td><td id="tOutShare">—</td></tr>
+        <tr><td>输出对账单的贡献</td><td id="tOutCost">—</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      这意味着：<strong>让模型少说废话，比换渠道更有效。</strong><br>
+      在提示词里加一句「用最少的话说明」或「控制在 200 字内」，通常能省 20–40%。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4. 上下文累积的隐形开销</h2>
+    <p style="color:var(--dim);font-size:14px">
+      多轮对话里，每一轮都要把<strong>前面全部历史</strong>重新送进去计费。跑 20 轮，第 20 轮的输入量约是第 1 轮的 20 倍。
+    </p>
+    <table>
+      <thead><tr><th>轮次</th><th>累计输入 token</th><th>相对第 1 轮</th></tr></thead>
+      <tbody id="tGrowth"></tbody>
+    </table>
+    <div class="tip">
+      做法：完成一个任务就<strong>开新会话</strong>。Claude Code 里是 <code>/clear</code>。这一条一个月能省 20–30%。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>5. 选渠道前必须问的三个数</h2>
+    <table>
+      <thead><tr><th>要问的</th><th>为什么</th></tr></thead>
+      <tbody>
+        <tr><td>输入单价</td><td>不给的，要么不懂，要么在算别的账</td></tr>
+        <tr><td>输出单价</td><td>和输入差 3–5 倍，只报一个数的没法算</td></tr>
+        <tr><td>分组倍率</td><td>实际扣费 = token × 单价 × 倍率</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      本站自己在用的渠道：倍率在<strong>登录后的控制台</strong>里公开，没有独立公开价格页——这一点我们直接写在
+      <a href="https://api.97wl.cc/">站点</a>说明里，不假装有。
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>计算器不收集任何数据，全部在本地浏览器内完成。</p>
+    <p style="margin-top:8px">单价请以你自己渠道的控制台为准。本站不转载任何来源不明的报价。</p>
+    <p style="margin-top:14px"><a href="https://1261398983.github.io/ai-api-guide/">← 返回配置指南</a> · <a href="https://api.97wl.cc/">RELAY X 中转站</a></p>
+  </div>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString('zh-CN', { maximumFractionDigits: 2 });
+
+function calc() {
+  const inTok  = +$('inTok').value || 0;
+  const outTok = +$('outTok').value || 0;
+  const perDay = +$('perDay').value || 0;
+  const days   = +$('days').value || 0;
+  const inP    = +$('inPrice').value || 0;
+  const outP   = +$('outPrice').value || 0;
+
+  const inCostDay  = perDay * inTok  / 1e6 * inP;
+  const outCostDay = perDay * outTok / 1e6 * outP;
+  const dayCost    = inCostDay + outCostDay;
+  const monthCost  = dayCost * days;
+  const tokensMonth = perDay * (inTok + outTok) * days;
+
+  $('rDay').textContent   = '¥' + fmt(dayCost);
+  $('rMonth').textContent = '¥' + fmt(monthCost);
+  $('rTok').textContent   = tokensMonth >= 1e6
+    ? (tokensMonth / 1e6).toFixed(2) + ' M'
+    : fmt(Math.round(tokensMonth / 1000)) + ' K';
+
+  const outShare = dayCost > 0 ? outCostDay / dayCost : 0;
+  $('rRatio').textContent = (outShare * 100).toFixed(0) + '%';
+
+  const tokenShare = (inTok + outTok) > 0 ? outTok / (inTok + outTok) : 0;
+  $('tOutShare').textContent = (tokenShare * 100).toFixed(0) + '% 的 token 是输出';
+  $('tOutCost').textContent  = (outShare * 100).toFixed(0) + '%';
+
+  // 提示
+  let msg = '';
+  if (outShare > 0.7) {
+    msg = `你的输出花费占了 <strong>${(outShare*100).toFixed(0)}%</strong>。这是最常见的高账单来源——模型说得太多了，不是单价问题。`;
+  } else if (outShare < 0.35 && dayCost > 0) {
+    msg = `输出只占 <strong>${(outShare*100).toFixed(0)}%</strong>，说明你主要是长上下文任务（读代码、查文档）。这类任务省钱的关键是控制上下文长度。`;
+  } else if (dayCost === 0) {
+    msg = '填入用量和单价后自动计算。';
+  } else {
+    msg = `输入占 <strong>${(100-outShare*100).toFixed(0)}%</strong>，输出占 <strong>${(outShare*100).toFixed(0)}%</strong>。这个比例算健康。`;
+  }
+  $('ratioNote').innerHTML = msg;
+
+  // 分级
+  const sr = +$('simpleRatio').value / 100;
+  const cr = +$('cheapRatio').value / 100;
+  $('simpleVal').textContent = Math.round(sr * 100) + '%';
+  $('cheapVal').textContent  = Math.round(cr * 100) + '%';
+
+  const after = monthCost * ((1 - sr) + sr * cr);
+  $('rBefore').textContent = '¥' + fmt(monthCost);
+  $('rAfter').textContent  = '¥' + fmt(after);
+  $('rSave').textContent   = '¥' + fmt(monthCost - after);
+
+  // 上下文增长表
+  const rows = [];
+  let cum = 0;
+  for (let i = 1; i <= 20; i++) {
+    cum += inTok;
+    if (i === 1 || i === 5 || i === 10 || i === 15 || i === 20) {
+      rows.push(`<tr><td>第 ${i} 轮</td><td>${fmt(cum)}</td><td>${(cum / inTok).toFixed(1)}×</td></tr>`);
+    }
+  }
+  $('tGrowth').innerHTML = rows.join('');
+}
+
+document.querySelectorAll('input').forEach(el => {
+  el.addEventListener('input', calc);
+});
+calc();
+
+// JSON-LD
+const ld = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AI API 费用计算器",
+  "url": "https://1261398983.github.io/ai-api-guide/calc/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+  "description": "输入调用量、输入输出 token 与单价，计算 AI API 每月真实花费。含任务分级省钱测算与上下文累积开销说明。"
+};
+const s = document.createElement('script');
+s.type = 'application/ld+json';
+s.textContent = JSON.stringify(ld);
+document.head.appendChild(s);
+</script>
+</body>
+</html>
