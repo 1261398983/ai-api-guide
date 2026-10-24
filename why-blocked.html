@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claude Code 在国内到底卡在哪？四条路径排查（附命令）</title>
+<meta name="description" content="连不上 Claude Code 通常不是「被墙」一个原因。DNS 污染、TLS 握手失败、出口 IP 被风控、账号区域限制，四个环节各有不同的报错与验证方法。本文给出逐层定位的命令与四条可选路径的取舍。">
+<meta property="og:title" content="Claude Code 在国内到底卡在哪？四条路径排查">
+<meta property="og:description" content="DNS、TLS、出口 IP、账号区域——逐层定位，附可复制命令。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/why-blocked.html">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/why-blocked.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"Claude Code 在国内到底卡在哪？四条路径排查","description":"DNS、TLS、出口 IP、账号区域四个环节的定位方法与命令。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"RELAY X"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/why-blocked.html"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Claude Code 报 ECONNRESET 是什么原因？","acceptedAnswer":{"@type":"Answer","text":"常见于 TLS 握手被中断，而不是 DNS 解析失败。用 curl -v 看握手阶段卡在哪一步：TCP 连上但 TLS 未完成，说明是传输层被干扰。"}},{"@type":"Question","name":"改了 base URL 就能用吗？","acceptedAnswer":{"@type":"Answer","text":"还需要正确的鉴权变量。Claude Code 读的是 ANTHROPIC_AUTH_TOKEN 而不是 ANTHROPIC_API_KEY，两者写错会得到 401 而不是连接错误。"}},{"@type":"Question","name":"用代理和用中转站有什么区别？","acceptedAnswer":{"@type":"Answer","text":"代理是把请求原样转发到官方，账号与计费仍在官方；中转站是把协议兼容层放在国内，用人民币按量结算。代理更接近官方体验，中转更省事、更便宜，但需要额外信任运营方。"}}]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{padding:10px;border-bottom:1px solid #1b2748;text-align:left}
+th{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">排障指南 · 2026-10-24</div>
+  <h1>Claude Code 在国内到底卡在哪</h1>
+  <div class="sub">四个环节、四种报错，逐层定位比反复重装有效。</div>
+</header>
+
+<h2>先分类：你看到的是哪一类错误</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>现象</th><th>卡住的环节</th><th>验证方式</th></tr></thead>
+    <tbody>
+      <tr><td>一直转圈、无响应</td><td>DNS 解析或 TCP 连接</td><td>`curl -v` 看是否解析出 IP</td></tr>
+      <tr><td>`ECONNRESET` / 握手失败</td><td>TLS 层被干扰</td><td>`curl -v` 卡在 TLS handshake</td></tr>
+      <tr><td>`401 Unauthorized`</td><td>鉴权变量写错</td><td>检查变量名与 key 前缀</td></tr>
+      <tr><td>`403` / 要求验证</td><td>出口 IP 或账号区域被风控</td><td>换出口或换端点对比</td></tr>
+      <tr><td>`429`</td><td>速率限制</td><td>看返回头里的 retry-after</td></tr>
+    </tbody>
+  </table>
+  <p class="note">先分类再动手。90% 的「装不上」其实是 401，不是网络问题。</p>
+</div>
+
+<h2>第一层：DNS</h2>
+<div class="card">
+  <pre><code># 看解析结果与耗时
+nslookup api.anthropic.com
+dig api.anthropic.com +short
+
+# 若返回 0.0.0.0 / 127.0.0.1 或超时，就是解析层出问题</code></pre>
+  <p>DNS 污染的特征是「解析很快返回一个明显不对的 IP」，而不是超时。两种情况的处理方式不同：前者换 DNS 解析路径，后者查本机网络。</p>
+</div>
+
+<h2>第二层：TLS 握手</h2>
+<div class="card">
+  <pre><code># -v 会打印握手细节
+curl -v --max-time 10 https://api.anthropic.com/v1/models
+
+# 关注这几行：
+#   Connected to ...            ← TCP 通了
+#   TLS handshake, Client hello ← 开始握手
+#   SSL connection using TLSv1.3 ← 握手成功
+# 若停在 Client hello 后无下文，就是传输层被干扰</code></pre>
+  <p>这一层的典型特征是<strong>TCP 能连上但 TLS 完不成</strong>。此时应用层重试没有意义，因为连接根本没建立。</p>
+</div>
+
+<h2>第三层：鉴权变量</h2>
+<div class="card">
+  <p>Claude Code 读的是 <code>ANTHROPIC_AUTH_TOKEN</code>，<strong>不是</strong> <code>ANTHROPIC_API_KEY</code>。写错变量名不会报网络错误，而是直接 401。</p>
+  <pre><code># 正确写法（注意结尾不要带 /v1）
+export ANTHROPIC_BASE_URL="https://你的端点"
+export ANTHROPIC_AUTH_TOKEN="sk-你的密钥"
+claude
+
+# 自检：确认变量已生效
+env | grep ANTHROPIC</code></pre>
+  <p class="note">另一个常见错误是 base URL 带上了 <code>/v1</code>：Anthropic 原生协议不需要，OpenAI 兼容协议才需要。</p>
+</div>
+
+<h2>第四层：出口 IP 与账号区域</h2>
+<div class="card">
+  <p>官方对注册地与常用出口有风控。即便网络通、key 对，也可能收到 403 或要求人机验证。判断方法：</p>
+  <pre><code># 看当前出口归属
+curl -s https://ipinfo.io/json | head -20
+
+# 对照：同一台机器换端点是否仍 403
+curl -s -o /dev/null -w "%{http_code}\n" https://你的中转端点/v1/models</code></pre>
+  <p>若官方 403 而中转端点 401（=需要 key，说明连通），问题就在账号/出口层，不在网络层。</p>
+</div>
+
+<h2>四条可选路径</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>路径</th><th>优点</th><th>代价</th></tr></thead>
+    <tbody>
+      <tr><td>官方 + 自建代理</td><td>体验最接近官方，账号仍在自己手上</td><td>需外币卡、需维护代理、仍需处理风控</td></tr>
+      <tr><td>官方 + 云厂商托管</td><td>合规票据齐全</td><td>贵，且可选模型受限</td></tr>
+      <tr><td>API 中转站</td><td>无需外币卡、人民币按量、国内直连</td><td>需信任运营方，模型与倍率要自己核</td></tr>
+      <tr><td>换工具</td><td>零成本</td><td>工作流要重学，生态不同</td></tr>
+    </tbody>
+  </table>
+  <p class="note">选哪条取决于你更在意「体验一致」还是「省事便宜」，没有普适答案。</p>
+</div>
+
+<h2>如果选中转：最小配置</h2>
+<div class="card">
+  <pre><code>export ANTHROPIC_BASE_URL="https://api.97wl.cc"
+export ANTHROPIC_AUTH_TOKEN="sk-你的密钥"
+claude
+
+# 先验证端点活着（不带 key 应返回 401，不是超时）
+curl -s -o /dev/null -w "%{http_code}\n" https://api.97wl.cc/v1/models</code></pre>
+  <p>返回 <code>401</code> 说明连通且鉴权生效；返回超时说明这个端点在你这儿不通，换路径比反复重装有用。</p>
+  <a class="cta" href="https://api.97wl.cc/register" target="_blank" rel="noopener">→ 打开注册页</a>
+  <p class="note">注册时在推广码栏填渠道码可领额外额度；建议先充最小额度验证连通性。</p>
+</div>
+
+<footer>
+  <a href="./">配置指南</a> · <a href="errors.html">错误码对照表</a> · <a href="migrate-relay.html">迁移清单</a> · <a href="uptime.html">延迟实测</a> · <a href="risk.html">风险自查</a><br>
+  本文为网络排障参考；具体可用性随网络环境与时间变化，请以实测为准
+</footer>
+</div>
+</body>
+</html>
