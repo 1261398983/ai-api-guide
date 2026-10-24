@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>团队共用一套 API Key 的四个坑，以及按人分配的正确做法</title>
+<meta name="description" content="多个开发者共用一把 API key 会带来四个问题：用量无法归属、一处泄露全员失效、并发超限互相挤占、离职后无法回收。本文给出按人/按项目分配子 key 的配置方法与额度策略。">
+<meta property="og:title" content="团队共用一套 API Key 的四个坑">
+<meta property="og:description" content="用量归属、泄露影响面、并发挤占、人员流动——以及按人分配子 key 的做法。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/team-keys.html">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/team-keys.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"团队共用一套 API Key 的四个坑，以及按人分配的正确做法","description":"共用 key 的风险与按人/按项目分配子 key 的配置方法。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"RELAY X"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/team-keys.html"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"一把 key 给整个团队用会有什么问题？","acceptedAnswer":{"@type":"Answer","text":"四个：用量无法归属到人；key 泄露时全员受影响且无法定位来源；并发或速率上限是共享的，会互相挤占；成员离职后无法单独回收其访问权。"}},{"@type":"Question","name":"应该按人还是按项目分配 key？","acceptedAnswer":{"@type":"Answer","text":"两者都要。人负责「谁在用」，项目负责「花在哪」。常见做法是每人一把个人 key 用于交互式使用，每个服务各一把项目 key 用于线上调用。"}},{"@type":"Question","name":"子 key 的额度怎么设？","acceptedAnswer":{"@type":"Answer","text":"按历史用量设上限，个人 key 月度额度设为近三个月峰值的 1.5 倍；项目 key 按预算设硬上限，并开启余额告警。"}}]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">团队实践 · 2026-10-24</div>
+  <h1>团队共用一套 API Key 的四个坑</h1>
+  <div class="sub">「先用一把，回头再拆」通常会变成永远不拆。</div>
+</header>
+
+<h2>四个坑</h2>
+<div class="card">
+  <h3>1. 用量无法归属到人 <span class="pill p-bad">最常见</span></h3>
+  <p>月底看到账单涨了三倍，但不知道是谁在用。多见于团队刚开始用 AI 编程工具的那两个月。</p>
+
+  <h3>2. 一处泄露，全员失效</h3>
+  <p>key 写进了某个公开仓库、贴进了聊天群、或者留在某人的 shell history 里。轮换时全团队一起停工。</p>
+  <p class="note">共用 key 还意味着：泄露后你无法判断是哪个人、哪个项目漏出去的。</p>
+
+  <h3>3. 并发与速率上限是共享的</h3>
+  <p>多数中转站按 key 计速率（RPM/TPM）。一个人跑批量任务，其他人的交互式请求就开始 429。这类问题最难排查——因为每个人单看都正常。</p>
+
+  <h3>4. 离职后收不回来</h3>
+  <p>共用 key 没法「只收回某个人的权限」，只能整体轮换，然后通知所有人改配置。实际执行时经常拖到出事才做。</p>
+</div>
+
+<h2>正确做法：两层 key</h2>
+<div class="card">
+  <p>不是简单地「一人一把」，而是<strong>按人 + 按项目</strong>两层：</p>
+  <ul>
+    <li><strong>个人 key</strong>：用于交互式使用（编辑器插件、CLI 临时调试），一人一把，设月度额度。</li>
+    <li><strong>项目 key</strong>：用于线上服务与批处理，一个服务一把，设硬上限与告警。</li>
+  </ul>
+  <p>这样「谁在用」和「花在哪」两个问题都能回答。</p>
+</div>
+
+<h2>额度怎么设</h2>
+<div class="card">
+  <ul>
+    <li>个人 key：近三个月用量的峰值 × 1.5，超出说明该人工作量变化或有人在滥用。</li>
+    <li>项目 key：按预算设硬上限，到 80% 告警、100% 停止。</li>
+    <li>临时 key：验证性任务单独开一把，用完即删，别设长期有效期。</li>
+  </ul>
+  <p class="note">额度不是越小越安全。设太紧会让人私下去找别的站，反而失去可见性。</p>
+</div>
+
+<h2>配置示例</h2>
+<div class="card">
+  <p>把 key 从代码里彻底拿出来，用环境变量或密钥管理服务：</p>
+  <pre><code># 个人使用：写进 shell 配置，不要写进项目文件
+export ANTHROPIC_BASE_URL="https://api.97wl.cc"
+export ANTHROPIC_AUTH_TOKEN="$TEAM_KEY_ALICE"
+
+# 线上服务：由部署平台注入，不要出现在仓库里
+# .env 加入 .gitignore，CI 用 secrets
+
+# 检查有没有漏在仓库里
+git grep -nE "sk-[A-Za-z0-9]{16,}" || echo "clean"</code></pre>
+  <p class="note">最后那条命令建议加进 pre-commit hook，成本几乎为零。</p>
+</div>
+
+<h2>轮换怎么做得不痛</h2>
+<div class="card">
+  <ol>
+    <li>所有 key 通过环境变量注入，轮换就是改一个值。</li>
+    <li>保留「新旧两把同时有效」的过渡窗口（多数面板支持多 key 并存）。</li>
+    <li>轮换后一周内检查旧 key 是否还有调用，有就是漏改的地方。</li>
+  </ol>
+  <p>做到这三条，轮换从「半天停工」变成「改配置 + 重启」。</p>
+</div>
+
+<h2>关于示例端点</h2>
+<div class="card">
+  <p>本矩阵示例统一用 <code>https://api.97wl.cc/v1</code>。它的面板支持创建多把 API key 与查看用量，适合按上面的两层结构拆分；具体额度与并发上限以站点后台实际展示为准。</p>
+  <a class="cta" href="https://api.97wl.cc/register" target="_blank" rel="noopener">→ 打开注册页</a>
+  <p class="note">注册时在推广码栏填渠道码可领额外额度；团队使用建议先充最小额度验证。</p>
+</div>
+
+<footer>
+  <a href="./">配置指南</a> · <a href="risk.html">风险自查</a> · <a href="invoice.html">发票与报销</a> · <a href="uptime.html">延迟实测</a> · <a href="errors.html">错误码对照表</a><br>
+  本文为工程实践建议，具体额度与并发策略以所用平台后台为准
+</footer>
+</div>
+</body>
+</html>
