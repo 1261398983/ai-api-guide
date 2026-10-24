@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>中转站能看到你的什么？数据流向、可见范围与五条自查（2026）</title>
+<meta name="description" content="AI API 中转站能完整看到你的 prompt 和回复，TLS 只保护传输那一段。本文拆解数据流向、列出中转方可见与不可见的范围、给五条可执行的自查与缓解动作，并说明企业数据的分类处理。">
+<meta property="og:title" content="中转站能看到你的什么：数据流向与五条自查">
+<meta property="og:description" content="TLS 保护的是传输，不是端点。中转方在解密后能看到完整请求与回复。附五条可执行的自查动作。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/privacy.html">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/privacy.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"中转站能看到你的什么：数据流向、可见范围与五条自查","description":"拆解 AI API 中转的数据流向与可见范围，给出可执行的自查与缓解动作。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"RELAY X"}},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"用了 HTTPS，中转站还能看到我的内容吗？","acceptedAnswer":{"@type":"Answer","text":"能。TLS 只保护客户端到中转服务器这一段，中转服务器是链路的终点之一，解密后拿到的是完整明文请求和回复，包括你的 prompt、贴进去的代码和模型输出。"}},
+{"@type":"Question","name":"把代码发给 AI，会不会被用于训练？","acceptedAnswer":{"@type":"Answer","text":"取决于上游服务商的政策，不由中转方单独决定。中转方通常会在协议里说明是否留存，但上游是否用于训练需要看上游服务商自己的条款。要确认只能逐层查。"}},
+{"@type":"Question","name":"企业代码能不能走中转站？","acceptedAnswer":{"@type":"Answer","text":"先做数据分级。公开或已开源的代码风险低；含客户信息、密钥、未公开算法的不建议走任何第三方明文链路，包括官方 API 之外的转发层。"}}
+]}]}
+</script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b0e13;color:#c9d4e6;font:16px/1.75 -apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:48px 22px 80px}
+h1{font-size:29px;line-height:1.4;color:#eaf0fa;margin:0 0 10px}
+.sub{color:#8a99b3;font-size:14px;margin-bottom:32px}
+h2{font-size:20px;color:#e6edf8;margin:36px 0 12px;padding-left:11px;border-left:3px solid #3b7ddd}
+h3{font-size:16px;color:#cfdcf0;margin:22px 0 8px}
+p{margin:10px 0;color:#b9c6da}
+code{background:#16203a;padding:1px 6px;border-radius:4px;font-size:14px;color:#9fc4f5}
+pre{background:#0f1725;border:1px solid #1e2b42;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.7}
+pre code{background:none;padding:0;color:#c3d3ea}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+th,td{border:1px solid #1e2b42;padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#121b2b;color:#d6e3f5}
+a{color:#6ea8fe;text-decoration:none}
+a:hover{text-decoration:underline}
+.warn{background:#1b1410;border-left:3px solid #d98324;padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14.5px;color:#e0c3a0}
+.note{background:#121b2b;border-left:3px solid #3b7ddd;padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14.5px;color:#a9b8cf}
+.cta{margin:40px 0 0;padding:18px 22px;border:1px solid #24304a;border-radius:12px;background:#0e1524;font-size:14.5px}
+.cta strong{color:#e8eef9}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid #1a2437;font-size:13px;color:#697a94}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>中转站能看到你的什么：数据流向、可见范围与五条自查</h1>
+<div class="sub">2026-10-24 · 先把链路讲清楚，再谈能不能用</div>
+
+<div class="warn">
+<strong>一句话结论</strong>：任何中转站在解密后都能完整看到你的 prompt 和模型回复，包括你贴进去的代码。HTTPS 保护的是「传输过程」，不是「服务端处理」。这不是某一家的问题，是这条链路的固有属性。
+</div>
+
+<h2>一、数据流向</h2>
+<pre><code>你的编辑器 / CLI
+   │  ① 明文请求，本地加密
+   ▼
+[TLS 隧道]  ← 这一段是加密的
+   │
+   ▼
+中转服务器  ← ② 解密后拿到完整明文
+   │  ③ 转发给上游
+   ▼
+上游服务商（OpenAI / Anthropic / Google …）
+   │
+   ▼
+回复沿原路返回</code></pre>
+<p>关键在第 ② 步：中转是链路的<strong>终点</strong>而不是「管道」。加密只在传输层存在，到了服务器必须解密才能转发。</p>
+
+<h2>二、中转方能看到什么</h2>
+<table>
+<tr><th>可见</th><th>说明</th></tr>
+<tr><td>完整 prompt</td><td>你的提问、贴进去的代码、报错栈、文件内容</td></tr>
+<tr><td>完整回复</td><td>模型输出的一切</td></tr>
+<tr><td>你的 key 与账户</td><td>用于鉴权与计费，通常以哈希或明文存储</td></tr>
+<tr><td>请求头与元数据</td><td>User-Agent、客户端版本、时间戳、IP</td></tr>
+<tr><td>调用模式</td><td>频率、模型选择、token 用量、失败重试</td></tr>
+</table>
+
+<h3>看不到的</h3>
+<ul>
+<li>你的本地文件系统（除非你主动把内容发出去）</li>
+<li>你机器上别的密钥、浏览器数据</li>
+<li>其他客户的数据（除非实现有严重缺陷）</li>
+</ul>
+
+<div class="note">
+<strong>常见误解</strong>：「我用了 HTTPS，所以安全」。HTTPS 防的是链路上被第三方窃听，防不了端点自己记录。判断安全性的正确问题不是「有没有 HTTPS」，而是「端点是否记录、记录多久、谁能看」。
+</div>
+
+<h2>三、五个该问的问题</h2>
+<table>
+<tr><th>问题</th><th>为什么重要</th></tr>
+<tr><td>请求内容是否落盘？</td><td>落盘就有泄露与调取风险；只在内存透传风险低一个量级</td></tr>
+<tr><td>留存多久？</td><td>「永久保留用于审计」和「24 小时滚动删除」完全不同</td></tr>
+<tr><td>谁能访问日志？</td><td>运维全员可见 vs 仅故障排查时授权</td></tr>
+<tr><td>是否用于训练或转售？</td><td>上游政策决定，但中转方应能明确回答</td></tr>
+<tr><td>有没有独立 key 与额度隔离？</td><td>决定泄露影响面，见 <a href="team-keys.html">团队 Key 管理</a></td></tr>
+</table>
+<p>这五个问题，正规服务商会在文档里写清楚；问不出答案的，按「全记录」对待即可。</p>
+
+<h2>四、五条可执行的自查与缓解</h2>
+
+<h3>1. 按用途分 key，不用同一个</h3>
+<p>一个 key 泄漏只影响一个场景。多数面板支持建多个子 key 并各自设额度，用完即删。</p>
+<pre><code># 泄露后 30 秒内止血：到面板删除该 key，而不是改密码
+# 改密码对已泄露的 key 无效</code></pre>
+
+<h3>2. 发出去之前先脱敏</h3>
+<p>让 AI 帮你看代码时，先替换掉真正的密钥、内网地址、客户标识：</p>
+<pre><code># 常见的无意泄露
+sk-live-xxxxxxxx          →  REDACTED_KEY
+10.20.30.40:5432          →  DB_HOST:PORT
+customer_id=8842          →  customer_id=CUSTOMER_A</code></pre>
+<p>更省事的做法是在项目里维护一个忽略清单（<code>.gitignore</code> 的思路），让工具不去读 <code>.env</code>、<code>*.pem</code>、<code>id_rsa</code>。</p>
+
+<h3>3. 检查你的规则文件有没有把敏感信息带进去</h3>
+<p><code>CLAUDE.md</code> / <code>.cursorrules</code> / <code>.aider.conf.yml</code> 里的内容会被一并发送。有人在这里写了内部 API 地址和测试账号，等于每次请求都在上传。</p>
+
+<h3>4. 分级使用，而不是一刀切</h3>
+<table>
+<tr><th>数据级别</th><th>建议</th></tr>
+<tr><td>公开代码 / 通用问题</td><td>随便走，风险可忽略</td></tr>
+<tr><td>内部业务代码（无客户数据）</td><td>可用，但要脱敏密钥与内网地址</td></tr>
+<tr><td>客户数据 / 未公开算法 / 密钥</td><td>不要走第三方明文链路</td></tr>
+</table>
+
+<h3>5. 用行为差异做一次小验证</h3>
+<p>同一段 prompt 分别发两次，观察响应头里有没有请求 ID、返回是否稳定。正规中转通常有可追踪的请求 ID——不是为了给你看日志，而是说明它有正经的转发实现，而不是简单脚本。</p>
+
+<h2>五、和官方 API 比，风险差在哪</h2>
+<table>
+<tr><th>维度</th><th>官方直连</th><th>中转</th></tr>
+<tr><td>数据可见方</td><td>1 家（上游）</td><td><strong>2 家</strong>（上游 + 中转）</td></tr>
+<tr><td>合同与管辖</td><td>明确的服务条款</td><td>多为平台公告，约束力弱</td></tr>
+<tr><td>泄露影响面</td><td>取决于上游</td><td>多一层，且中转侧安全水平不可审计</td></tr>
+<tr><td>成本</td><td>官方价</td><td>通常更低</td></tr>
+</table>
+<p>结论不是「别用」，而是<strong>把「省下的钱」和「多一层可见方」放在一起权衡</strong>。公开代码、学习场景、个人项目，这一层风险通常可以接受；客户数据和生产密钥，通常不必冒。</p>
+
+<div class="cta">
+<strong>本文示例端点</strong>：<code>https://api.97wl.cc/v1</code>（Anthropic 协议不带 <code>/v1</code>）<br>
+  第三方转发服务，<strong>同样属于「多一层可见方」</strong>；是否记录、留存多久请直接向运营方确认，本文不给保证。
+  <a href="https://api.97wl.cc/register">→ 注册入口（建议最小额度）</a> · <a href="risk.html">风险自查</a> · <a href="team-keys.html">团队 Key</a>
+</div>
+
+<footer>
+  <a href="index.html">配置指南</a> ·
+  <a href="tools.html">工具配置大全</a> ·
+  <a href="why-blocked.html">连不上排查</a> ·
+  <a href="errors.html">错误码对照</a> ·
+  <a href="cost-compare.html">成本对照</a> ·
+  <a href="risk.html">风险自查</a> ·
+  <a href="team-keys.html">团队 Key</a> ·
+  <a href="invoice.html">发票报销</a> ·
+  <a href="uptime.html">延迟实测</a><br>
+  本文为通用安全说明，不构成对任何具体服务商的安全承诺。
+</footer>
+</div>
+</body>
+</html>
