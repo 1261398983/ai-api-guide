@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>流式输出卡住不动？中转 SSE 逐层排查（附 nginx / Cloudflare 配置）</title>
+<meta name="description" content="开了 stream:true 却一次性吐出全部内容，或打字到一半停住——九成是中间层缓冲。本文按客户端、网关、代理、上游四层给判别方法与可复制配置（nginx proxy_buffering、Cloudflare 100 秒限制、fetch reader）。">
+<meta property="og:title" content="流式输出卡住不动？中转 SSE 逐层排查">
+<meta property="og:description" content="一次性返回 vs 逐字返回，四层定位：客户端没开 stream、网关缓冲、代理超时、上游不支持。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/streaming.html">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/streaming.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"流式输出卡住不动？中转 SSE 逐层排查","description":"流式失效的四层定位方法与 nginx / Cloudflare / 客户端配置。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"RELAY X"}},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"为什么开了 stream:true 还是一次性返回全部内容？","acceptedAnswer":{"@type":"Answer","text":"最常见的原因不是上游，而是中间层缓冲。nginx 默认 proxy_buffering on 会把上流数据攒够一块再发；Cloudflare 免费版也会缓冲。客户端侧 axios / requests 的默认读取方式同样会等整个响应体结束。"}},
+{"@type":"Question","name":"流式输出到第 100 秒突然断掉是什么原因？","acceptedAnswer":{"@type":"Answer","text":"Cloudflare 免费版对单个请求有 100 秒的响应超时。长回复或长思考会撞上这个上限，表现为内容吐到一半连接被切断，且通常没有明确报错。"}},
+{"@type":"Question","name":"怎么判断是假流式（服务端先聚合再逐字吐）？","acceptedAnswer":{"@type":"Answer","text":"用 curl -N 记录每个数据块到达的时间戳。真流式相邻块间隔几十毫秒且首块很快出现；假流式会先静默几秒（等上游生成完），然后所有块在极短时间内连续到达。"}}
+]}]}
+</script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b0e13;color:#c9d4e6;font:16px/1.75 -apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:48px 22px 80px}
+h1{font-size:29px;line-height:1.4;color:#eaf0fa;margin:0 0 10px}
+.sub{color:#8a99b3;font-size:14px;margin-bottom:32px}
+h2{font-size:20px;color:#e6edf8;margin:36px 0 12px;padding-left:11px;border-left:3px solid #3b7ddd}
+h3{font-size:16px;color:#cfdcf0;margin:22px 0 8px}
+p{margin:10px 0;color:#b9c6da}
+code{background:#16203a;padding:1px 6px;border-radius:4px;font-size:14px;color:#9fc4f5}
+pre{background:#0f1725;border:1px solid #1e2b42;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.7}
+pre code{background:none;padding:0;color:#c3d3ea}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+th,td{border:1px solid #1e2b42;padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#121b2b;color:#d6e3f5}
+a{color:#6ea8fe;text-decoration:none}
+a:hover{text-decoration:underline}
+.note{background:#121b2b;border-left:3px solid #3b7ddd;padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14.5px;color:#a9b8cf}
+.cta{margin:40px 0 0;padding:18px 22px;border:1px solid #24304a;border-radius:12px;background:#0e1524;font-size:14.5px}
+.cta strong{color:#e8eef9}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid #1a2437;font-size:13px;color:#697a94}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>流式输出卡住不动？中转 SSE 逐层排查</h1>
+<div class="sub">2026-10-24 · 症状 → 分层 → 每条给判别命令</div>
+
+<p>流式失效有三种典型表现，原因完全不同：</p>
+<table>
+<tr><th>表现</th><th>大概率原因</th></tr>
+<tr><td>开了 <code>stream:true</code>，但一次性返回全部</td><td>某一层缓冲（nginx / CDN / 客户端读法）</td></tr>
+<tr><td>开始正常，吐到一半停住</td><td>代理超时（Cloudflare 100s、网关 read timeout）</td></tr>
+<tr><td>先静默几秒，然后瞬间全部出现</td><td>假流式：服务端先聚合再逐字吐</td></tr>
+</table>
+
+<h2>一、先确认客户端真的在流式读</h2>
+
+<h3>curl 基准测试</h3>
+<pre><code>curl -N -X POST https://api.97wl.cc/v1/chat/completions \
+  -H "Authorization: Bearer sk-你的key" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-5.1","stream":true,"messages":[{"role":"user","content":"数到二十"}]}' \
+  | while IFS= read -r line; do printf "%s %s\n" "$(date +%s.%N)" "$line"; done</code></pre>
+
+<p><code>-N</code> 关闭 curl 自身的缓冲，这很关键——不加 <code>-N</code> 会把流攒成整块，让你误判。</p>
+
+<p>看时间戳：</p>
+<table>
+<tr><th>时间戳形态</th><th>结论</th></tr>
+<tr><td>首块很快，后续间隔几十毫秒</td><td>链路正常，问题在你的客户端</td></tr>
+<tr><td>首块就很慢，之后均匀</td><td>上游慢，不是流式问题</td></tr>
+<tr><td>静默数秒后全部块同时到达</td><td>中间层缓冲，或服务端假流式</td></tr>
+</table>
+
+<h3>代码里常见的两个错误</h3>
+<pre><code>// ❌ axios 默认会把整个响应读完再给你
+const res = await axios.post(url, body)
+
+// ✅ 用 responseType: 'stream'（Node）/ fetch + reader（浏览器）
+const res = await fetch(url, { method:'POST', headers, body: JSON.stringify(body) })
+const reader = res.body.getReader()
+const dec = new TextDecoder()
+while (true) {
+  const { done, value } = await reader.read()
+  if (done) break
+  process.stdout.write(dec.decode(value, { stream: true }))
+}</code></pre>
+<p>Python 侧对应的是 <code>requests(..., stream=True)</code> + <code>iter_lines()</code>；忘了 <code>stream=True</code> 就会一次性拿到全文。</p>
+
+<h2>二、服务端中间层：缓冲</h2>
+
+<h3>nginx</h3>
+<p>默认 <code>proxy_buffering on</code>，会把上游数据攒够一个 buffer 再转发。流式接口必须关掉：</p>
+<pre><code>location /v1/ {
+    proxy_pass http://upstream;
+    proxy_http_version 1.1;
+
+    proxy_buffering off;              # 关键
+    proxy_cache off;
+    proxy_set_header Connection "";
+    chunked_transfer_encoding on;
+
+    proxy_read_timeout 300s;          # 长回复别用默认 60s
+    proxy_send_timeout 300s;
+}</code></pre>
+<div class="note">
+<strong>注意</strong>：<code>proxy_buffering off</code> 只对 <code>/v1/</code> 这类转发路径加，不要加在整站上——静态资源开缓冲反而更快。
+</div>
+
+<h3>Cloudflare</h3>
+<ul>
+<li>免费版单请求响应上限 <strong>100 秒</strong>，长回复会被切断且通常不报错</li>
+<li>默认对 HTML 缓存与压缩，SSE 需要确认响应头是 <code>text/event-stream</code> 且 <code>Cache-Control: no-cache</code></li>
+<li>某些压缩（Brotli）会在服务端聚合后再发，等于消灭流式</li>
+</ul>
+
+<h3>其他常见中间件</h3>
+<table>
+<tr><th>组件</th><th>要检查的点</th></tr>
+<tr><td>宝塔 / Nginx Proxy Manager</td><td>默认开的 gzip 与 buffering</td></tr>
+<tr><td>Apache</td><td><code>SetEnv proxy-sendchunked 1</code>、关闭 <code>mod_deflate</code></td></tr>
+<tr><td>Caddy</td><td>默认已支持流式，主要看 <code>encode</code> 指令</td></tr>
+<tr><td>Node 反代（http-proxy）</td><td>需 <code>selfHandleResponse</code> 或直接 pipe 不缓冲</td></tr>
+</table>
+
+<h2>三、上游与协议层</h2>
+
+<h3>响应头对不对</h3>
+<pre><code>Content-Type: text/event-stream
+Cache-Control: no-cache
+X-Accel-Buffering: no</code></pre>
+<p>最后一行是给 nginx 看的覆盖指令。有些网关通过它单独关闭缓冲，比改全局配置安全。</p>
+
+<h3>Anthropic 协议的差异</h3>
+<p>Anthropic 的流式事件是分类型的（<code>message_start</code> / <code>content_block_delta</code> / <code>message_stop</code>），解析方式和 OpenAI 的 <code>data: {...}</code> 不同。用 OpenAI SDK 去打 Anthropic 端点会收不到 delta，表现像「卡住」。</p>
+
+<h2>四、判断是不是假流式</h2>
+<p>真流式：首 token 延迟（TTFT）明显小于总时长，且块间隔稳定。<br>
+假流式：服务端等上游生成完，再把内容按字切开发给你——总时长不变，但首块延迟 ≈ 总时长。</p>
+
+<pre><code># 直接对比两个数字
+总耗时：curl -o /dev/null -s -w "%{time_total}\n" ...
+首块时间：上面那条带时间戳的命令，看第一个 data 行的时间</code></pre>
+<p>若两者几乎相等，就是假流式。这不是「坏了」，但意味着你失去了流式在体验上的全部好处。</p>
+
+<h2>五、排查顺序（照这个顺序做，不要跳）</h2>
+<ol>
+<li><code>curl -N</code> 打一次，确认服务端本身是否流式</li>
+<li>若服务端正常 → 换客户端写法（fetch reader / stream=True）</li>
+<li>若服务端也不流 → 查 <code>Content-Type</code> 与 <code>X-Accel-Buffering</code></li>
+<li>仍不流 → 查中间层 buffering 与压缩</li>
+<li>流到一半断 → 查超时（Cloudflare 100s、nginx read_timeout）</li>
+</ol>
+
+<div class="cta">
+  <strong>本文示例端点</strong>：<code>https://api.97wl.cc/v1</code>（Anthropic 协议不带 <code>/v1</code>）<br>
+  QQ 邮箱注册，无需邀请码，按量计费；支持 OpenAI 与 Anthropic 两套协议。
+  <a href="https://api.97wl.cc/register">→ 注册入口</a> · <a href="tools.html">工具配置大全</a> · <a href="errors.html">错误码对照</a>
+</div>
+
+<footer>
+  <a href="index.html">配置指南</a> ·
+  <a href="tools.html">工具配置大全</a> ·
+  <a href="why-blocked.html">连不上排查</a> ·
+  <a href="errors.html">错误码对照</a> ·
+  <a href="privacy.html">数据安全</a> ·
+  <a href="cost-compare.html">成本对照</a> ·
+  <a href="risk.html">风险自查</a> ·
+  <a href="team-keys.html">团队 Key</a> ·
+  <a href="uptime.html">延迟实测</a><br>
+  第三方转发服务，非上游官方产品。配置示例以各组件当前版本为准。
+</footer>
+</div>
+</body>
+</html>
