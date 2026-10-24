@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>中转站 vs 官方 API：真实成本对照（含汇率与失败重试）</title>
+<meta name="description" content="中转站的「0.08x」不等于官方价的 8%。把汇率、失败重试、上下文重传、最低充值门槛算进去，实际成本差距会缩小。本文给出可自己代入的对照公式与三种典型场景测算。">
+<meta property="og:title" content="中转站 vs 官方 API：真实成本对照">
+<meta property="og:description" content="倍率、汇率、重试损耗、起充门槛——四件事决定你实际付了多少。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/cost-compare.html">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/cost-compare.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"中转站 vs 官方 API：真实成本对照","description":"把倍率、汇率、重试损耗与起充门槛算进去后的成本对照方法。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"RELAY X"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/cost-compare.html"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"中转站标 0.08x 就是官方价的 8% 吗？","acceptedAnswer":{"@type":"Answer","text":"不一定。倍率通常按站点自定义的基准价计算，而基准价可能高于官方价。要拿同一模型的官方单价与站点实际扣费做对比，而不是只看倍率数字。"}},{"@type":"Question","name":"为什么失败重试会让成本上升？","acceptedAnswer":{"@type":"Answer","text":"多数平台对已产生输出的失败请求仍计费，或至少计入输入 token。长上下文任务重试一次，成本可能翻倍。稳定性差的中转站，节省的单价会被重试吃掉。"}},{"@type":"Question","name":"小额高频充值和一次充大额哪个更划算？","acceptedAnswer":{"@type":"Answer","text":"单价上大额常有赠送，但预付款有损失风险。按两周用量充值是成本与风险的平衡点。"}}]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{padding:10px;border-bottom:1px solid #1b2748;text-align:left}
+th{color:var(--dim);font-size:13px}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">成本计算 · 2026-10-24</div>
+  <h1>中转站 vs 官方 API</h1>
+  <div class="sub">「0.08x」不等于官方价的 8%。四件事决定你实际付了多少。</div>
+</header>
+
+<h2>先破一个误解</h2>
+<div class="card">
+  <p>看到「官网价 0.08x」就以为省了 92%，是这类站点最常见的误读。</p>
+  <p>倍率乘的是<strong>站点自己定义的基准价</strong>，不是官方价。基准价高于官方价时，0.08x 可能只等于官方价的 20%–30%，而不是 8%。</p>
+  <p>唯一可靠的算法：<strong>拿同一个模型的官方单价，和站点后台的实际扣费，做同任务对比</strong>。</p>
+</div>
+
+<h2>四件常被漏算的事</h2>
+<div class="card">
+  <h3>1. 汇率与结算货币</h3>
+  <p>官方价以美元计，中转站多以人民币充值。人民币兑美元波动 3% 时，标称的折扣会跟着变。算成本时统一换算到一个币种。</p>
+
+  <h3>2. 失败重试的二次计费</h3>
+  <p>长上下文任务失败一次，重试等于把输入 token 再买一遍。如果站点稳定性是 95%，理论上你的有效成本要乘 1.05；稳定性 80% 就是 1.25。</p>
+
+  <h3>3. 上下文重传</h3>
+  <p>多轮对话每轮都要重发历史。这条在官方和中转都成立，但中转常没有 prompt caching 的折扣，长对话场景差距会放大。</p>
+
+  <h3>4. 起充门槛与余额沉淀</h3>
+  <p>「充 100 送 20」看着划算，但如果你的实际用量是每月 30，这笔钱要压三四个月。预付款的时间成本与损失风险都该计入。</p>
+</div>
+
+<h2>对照公式</h2>
+<div class="card">
+  <pre><code>实际单位成本 =
+    (官方单价 × 汇率 × 站点倍率)
+  × (1 / 成功率)          # 重试损耗
+  × (1 + 缓存缺失溢价)     # 长对话场景才有
+  + 预付款年化资金成本
+
+# 举例（假设值，请用你自己的实测替换）
+官方 $15/M output tokens
+汇率 7.2   倍率 0.22   成功率 97%   无缓存
+→ 15 × 7.2 × 0.22 ÷ 0.97 ≈ 24.5 元 / M tokens</code></pre>
+  <p class="note">把你的真实数字代进去，和官方直连（含汇率、税费、外币卡手续费）比，才是可比的结论。</p>
+</div>
+
+<h2>三种典型场景</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>场景</th><th>月用量</th><th>更划算的选择</th><th>原因</th></tr></thead>
+    <tbody>
+      <tr><td>个人学习 / 小工具</td><td class="num">&lt; $10</td><td>中转站</td><td>官方有起充门槛与外币卡要求，中转可小额试</td></tr>
+      <tr><td>团队日常编码</td><td class="num">$50–300</td><td>看稳定性</td><td>单价差被重试损耗吃掉时，官方更稳</td></tr>
+      <tr><td>线上服务</td><td class="num">&gt; $500</td><td>官方或云市场</td><td>需要 SLA、发票与配额保障，中转不具备</td></tr>
+    </tbody>
+  </table>
+  <p class="note">金额阈值会随汇率和站点定价变化，表里的数字是量级参考，不是精确分界。</p>
+</div>
+
+<h2>怎么自己测一次</h2>
+<div class="card">
+  <pre><code># 1. 用同一个 prompt、同一个模型，各跑 20 次
+# 2. 记录：耗时、是否成功、返回的 usage 字段
+# 3. 用站点后台的扣费金额 ÷ 实际 token 数，得到真实单价
+# 4. 与官方价 × 汇率 对比
+
+# 关键：一定要看 usage 里的 output_tokens，
+# 有些站点会在返回里少报 token，但按未压缩的量扣费</code></pre>
+  <p>这套测法 30 分钟能跑完，比看任何评测文都准。</p>
+</div>
+
+<h2>关于本站示例</h2>
+<div class="card">
+  <p>本矩阵示例使用 <code>https://api.97wl.cc/v1</code>。按量计费、支持人民币充值；具体倍率与分组价格请以站点后台展示为准，本文不给任何「省 X%」的承诺。</p>
+  <a class="cta" href="https://api.97wl.cc/register" target="_blank" rel="noopener">→ 打开注册页（先小额验证）</a>
+  <p class="note">要算自己的场景，用 <a href="calc/">费用计算器</a> 代入实际用量。</p>
+</div>
+
+<footer>
+  <a href="./">配置指南</a> · <a href="calc/">费用计算器</a> · <a href="risk.html">风险自查</a> · <a href="invoice.html">发票与报销</a> · <a href="uptime.html">延迟实测</a><br>
+  本文为成本估算方法参考，实际计费以各平台后台为准
+</footer>
+</div>
+</body>
+</html>
