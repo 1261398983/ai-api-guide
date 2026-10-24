@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>中转站跑路前兆与资金安全：7 个信号 + 60 秒自查（2026 版）</title>
+<meta name="description" content="AI API 中转站跑路前有哪些前兆？充值前 60 秒能查的 7 件事：域名年龄、公告频率、提现规则、群活跃度、模型指纹、余额条款、退款政策。附可复制的 curl 自查命令。">
+<meta property="og:title" content="中转站跑路前兆与资金安全：7 个信号 + 60 秒自查">
+<meta property="og:description" content="充值前 60 秒能查的 7 件事，以及三种不该一次充太多钱的情形。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/risk.html">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/risk.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"中转站跑路前兆与资金安全：7 个信号 + 60 秒自查","description":"AI API 中转站充值前的风险自查清单与可复制的验证命令。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"RELAY X"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/risk.html"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"中转站一般多久会跑路？","acceptedAnswer":{"@type":"Answer","text":"没有固定周期。常见触发点是：上游渠道成本上涨、被大规模滥用导致封号、运营者资金链断裂。可观察的前兆是公告突然变少、客服响应变慢、提现或退款规则收紧。"}},{"@type":"Question","name":"一次充多少钱比较安全？","acceptedAnswer":{"@type":"Answer","text":"按你两周的实际用量充。这样即使站点明天消失，损失上限也是两周账单，而不是半年预付款。"}},{"@type":"Question","name":"余额不过期是不是就不用担心？","acceptedAnswer":{"@type":"Answer","text":"不是。余额不过期只说明条款上不设时限，不代表站点会一直存在。条款和运营持续性是两个独立问题。"}}]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">风险自查 · 2026-10-24</div>
+  <h1>中转站跑路前兆与资金安全</h1>
+  <div class="sub">充值前 60 秒能查的 7 件事，以及三种不该一次充太多钱的情形。</div>
+</header>
+
+<h2>先说结论</h2>
+<div class="card">
+  <p>中转站不是银行。你充进去的是<strong>预付款</strong>，不是存款，没有存款保险，也没有监管兜底。所以真正要控制的不是「选到不会跑路的站」，而是<strong>跑路时你最多损失多少</strong>。</p>
+  <p>可操作的只有一条：<strong>按两周用量充值</strong>。站点第二天消失，你的上限就是两周账单。</p>
+  <p class="note">本文不推荐任何具体站点，包括本站示例所用的端点。所有中转站都适用同一套风险逻辑。</p>
+</div>
+
+<h2>7 个可查信号</h2>
+<div class="card">
+  <h3>1. 域名注册时间 <span class="pill p-warn">易查</span></h3>
+  <p>三个月内注册的域名，运营历史还没经过一次完整的「上游涨价 / 封号潮」。不是不能充，是别充多。</p>
+  <pre><code># 看 Creation Date 与 Registrar
+whois 站点域名</code></pre>
+
+  <h3>2. 公告频率与内容 <span class="pill p-warn">易查</span></h3>
+  <p>健康站点的公告通常是「新增模型 / 调整倍率 / 维护通知」。危险信号是：公告突然长时间空白，或连续多条都是「充值活动」而没有任何技术更新。</p>
+
+  <h3>3. 提现与退款条款 <span class="pill p-bad">关键</span></h3>
+  <p>很多站点条款写着「余额不可提现、不可退款」。这条本身合法，但意味着<strong>你充进去的钱只能是沉没成本</strong>。看到这条就该把单次充值额再降一档。</p>
+
+  <h3>4. 群活跃度与客服响应 <span class="pill p-warn">易查</span></h3>
+  <p>不是看人数，是看<strong>提问到回复的间隔</strong>。三天没人回的技术问题，说明运维已经不在状态。</p>
+
+  <h3>5. 模型指纹是否对得上 <span class="pill p-bad">关键</span></h3>
+  <p>「偷换模型」比跑路更常见：标着 Opus，实际回 GPT。用固定提示词问一个模型特有的细节，或直接看返回 JSON 里的 <code>model</code> 字段。</p>
+  <pre><code>curl https://站点/v1/chat/completions \
+  -H "Authorization: Bearer $KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"claude-opus-4-5","messages":[{"role":"user","content":"ping"}],"max_tokens":8}'</code></pre>
+  <p class="note">返回里的 model 字段必须和你请求的一致。不一致就是换了上游。</p>
+
+  <h3>6. 余额与倍率条款是否写得清楚 <span class="pill p-warn">易查</span></h3>
+  <p>「按官网价 0.08x」这种表述，要能对上后台的倍率表。倍率写得越模糊，后期单方面调整的空间越大。</p>
+
+  <h3>7. 是否有第二家可用 <span class="pill p-ok">最重要</span></h3>
+  <p>真正的风险控制不是「找到最稳的一家」，而是<strong>随时能换</strong>。只要你的代码里 base_url 是配置项而不是硬编码，换站成本就是改一行。</p>
+</div>
+
+<h2>三种不该一次充太多钱的情形</h2>
+<div class="card">
+  <ol>
+    <li><strong>站点上线不足 3 个月</strong>，且没有公开的运营主体信息。</li>
+    <li><strong>条款明确写「不可退款」</strong>，同时又在推大额充值返赠（充得越多，跑路收益越高）。</li>
+    <li><strong>你自己还没跑满一个完整计费周期</strong>——第一次用某站就充半年，等于用真金白银做尽调。</li>
+  </ol>
+</div>
+
+<h2>已被套住怎么办</h2>
+<div class="card">
+  <ol>
+    <li><strong>先止损，不追加。</strong>「再充一点就能提现」是最典型的二次收割话术。</li>
+    <li><strong>导出用量与余额截图</strong>，保留充值记录（支付平台订单号）。</li>
+    <li><strong>立刻把业务切到备用端点</strong>，别等公告。</li>
+    <li>如果是通过支付平台（支付宝/微信）付款且时间很短，可尝试平台申诉；预付费虚拟服务的追回率不高，但比什么都不做强。</li>
+  </ol>
+  <p class="note">不建议去「维权群」里二次付费找所谓内部渠道，那是第三层收割。</p>
+</div>
+
+<h2>把风险写进配置里</h2>
+<div class="card">
+  <p>技术上做三件事，跑路时就只是「切换」，不是「事故」：</p>
+  <pre><code># 1. base_url 从环境变量读，不写死
+export OPENAI_BASE_URL="https://你的站点/v1"
+
+# 2. 关键业务保留第二家的 key
+export OPENAI_BASE_URL_FALLBACK="https://备用站点/v1"
+
+# 3. 每月对一次官方账单与站点用量，差 5% 以上就要查</code></pre>
+  <p>做到这三条，任何一家跑路对你的影响都只是「今天多花十分钟改配置」。</p>
+</div>
+
+<h2>关于本站示例端点</h2>
+<div class="card">
+  <p>本矩阵的示例统一用 <code>https://api.97wl.cc/v1</code>。按上面 7 条自查，它属于「按量计费、余额不过期、QQ 邮箱可注册」这一类；但<strong>同样没有存款保障，同样适用「按两周用量充值」</strong>。</p>
+  <p>如果你只是要一个能跑通的端点做验证，充最小额度即可。别因为看过任何一篇推荐文就加大预付。</p>
+  <a class="cta" href="https://api.97wl.cc/register" target="_blank" rel="noopener">→ 打开注册页（最小额度即可）</a>
+  <p class="note">注册时在推广码栏填渠道码可领额外额度；不填也能正常用。</p>
+</div>
+
+<footer>
+  <a href="./">配置指南</a> · <a href="choosing-relay.html">中转站怎么选</a> · <a href="uptime.html">延迟实测</a> · <a href="errors.html">错误码对照表</a> · <a href="calc/">费用计算器</a><br>
+  本文为风险教育内容，不构成投资或消费建议；条款以各站点实际展示为准
+</footer>
+</div>
+</body>
+</html>
