@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI API 中转站能开发票吗？企业采购与报销实操（2026）</title>
+<meta name="description" content="中转站大多是个人或小团队运营，能不能开票要先问清三件事：发票类型、开票主体、开票内容。本文给出采购前的问询清单、无法开票时的四条合规替代路径，以及团队账号管理的注意事项。">
+<meta property="og:title" content="AI API 中转站能开发票吗？企业采购与报销实操">
+<meta property="og:description" content="采购前要问的三件事、无法开票时的四条替代路径、团队账号管理注意事项。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/invoice.html">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/invoice.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"AI API 中转站能开发票吗？企业采购与报销实操","description":"中转站采购前的开票问询清单、无法开票时的合规替代路径与团队账号管理。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"RELAY X"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/invoice.html"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"大部分 AI API 中转站能开增值税发票吗？","acceptedAnswer":{"@type":"Answer","text":"多数不能。中转站常由个人或小团队运营，没有对公账户和开票资质。采购前必须直接问：能否开票、发票类型（普票/专票）、开票主体名称、开票内容类目。"}},{"@type":"Question","name":"开不了发票，公司还能报销这笔支出吗？","acceptedAnswer":{"@type":"Answer","text":"取决于公司财务制度。常见可行路径是走个人垫付后按「软件服务费」凭支付凭证与订单明细报销，或改用支持开票的官方 API / 云厂商市场下单。具体以本单位财务口径为准。"}},{"@type":"Question","name":"团队多人共用一套 API key 有什么风险？","acceptedAnswer":{"@type":"Answer","text":"无法区分用量归属、一处泄露全员受影响、并发超限会互相挤占。建议按人发子 key 或按项目分组，并保留调用日志。"}}]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{padding:10px;border-bottom:1px solid #1b2748;text-align:left}
+th{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">企业采购 · 2026-10-24</div>
+  <h1>中转站能开发票吗？</h1>
+  <div class="sub">采购前必须问清的三件事，开不了票时的四条替代路径。</div>
+</header>
+
+<h2>直接回答</h2>
+<div class="card">
+  <p><strong>多数中转站开不了增值税发票。</strong>原因是运营主体：很多是个人或小团队，没有对公账户与开票资质，收的是个人收款码或第三方支付。</p>
+  <p>所以问题不该是「哪家能开票」，而是<strong>「在开不了票的前提下，这笔支出怎么合规入账」</strong>。下面两条路都能走通，取决于你所在单位的财务口径。</p>
+</div>
+
+<h2>采购前要问的三件事</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>问什么</th><th>为什么</th><th>常见回答</th></tr></thead>
+    <tbody>
+      <tr><td>能否开票</td><td>决定这笔钱能不能直接进对公流程</td><td><span class="pill p-bad">不能</span> 占多数</td></tr>
+      <tr><td>发票类型（普票/专票）</td><td>专票才能抵扣进项税</td><td><span class="pill p-warn">视主体而定</span></td></tr>
+      <tr><td>开票主体名称与税号</td><td>主体与合同/付款方不一致会被财务打回</td><td>需与收款方一致</td></tr>
+    </tbody>
+  </table>
+  <p class="note">问的时候直接问，别绕。对方含糊其辞（「应该可以」「你先把钱充了再说」）基本等于不能开。</p>
+</div>
+
+<h2>开不了票时的四条路径</h2>
+<div class="card">
+  <h3>1. 官方 API 走对公 <span class="pill p-ok">最稳</span></h3>
+  <p>OpenAI / Anthropic / Google 的官方渠道支持企业签约与发票，但需要外币卡、境外主体或云厂商代理。成本比中转高，换来的是票据与合规完整。</p>
+
+  <h3>2. 云厂商市场下单</h3>
+  <p>部分云厂商的模型市场把第三方模型打包成自家商品，由云厂商开票。价格通常高于直连中转，但流程最省事——一张云账单解决所有模型。</p>
+
+  <h3>3. 个人垫付 + 费用报销</h3>
+  <p>小额、临时验证阶段常见做法：员工个人充值，凭<strong>支付凭证 + 订单明细 + 用量截图</strong>按「软件服务费」或「技术服务费」报销。</p>
+  <p class="note">关键是把三样材料存全：支付记录（含订单号）、站点后台的充值记录、实际调用量。缺一样财务大概率退回。</p>
+
+  <h3>4. 通过代理/服务商采购</h3>
+  <p>有些服务商把中转额度包装成自家产品对外销售并开票。要注意的是：这层加价通常 10%–30%，且服务商本身也可能是个人。</p>
+</div>
+
+<h2>团队使用要注意的三点</h2>
+<div class="card">
+  <h3>按人发子 key，不要全员共用一把</h3>
+  <p>共用 key 的三个后果：用量无法归属到人、一处泄露全员受影响、并发超限互相挤占。多数面板支持创建多把 key 并设额度。</p>
+
+  <h3>留调用日志</h3>
+  <p>报销和审计时，「钱花在哪」比「花了多少」更容易被追问。至少保留月度用量汇总。</p>
+
+  <h3>预付费别一次充太多</h3>
+  <p>预付性质的钱在财务上属于「预付账款」，站点消失就是坏账。按季度用量充，别按年。</p>
+</div>
+
+<h2>一句话总结</h2>
+<div class="card">
+  <p>要票 → 走官方或云市场；不要票但要便宜 → 中转 + 个人垫付报销；团队用 → 子 key + 日志 + 小额预付。</p>
+  <p>本站示例端点 <code>https://api.97wl.cc/v1</code> 属于第二类：按量计费、支持个人充值，<strong>开票能力需直接向站点确认</strong>，本文不做承诺。</p>
+  <a class="cta" href="https://api.97wl.cc/register" target="_blank" rel="noopener">→ 打开注册页</a>
+  <p class="note">先充最小额度验证可用性，再决定是否扩大用量；开票问题请在充值前问清。</p>
+</div>
+
+<footer>
+  <a href="./">配置指南</a> · <a href="choosing-relay.html">中转站怎么选</a> · <a href="risk.html">风险自查</a> · <a href="uptime.html">延迟实测</a> · <a href="calc/">费用计算器</a><br>
+  本文为采购流程参考，税务与报销口径以所在单位财务制度为准
+</footer>
+</div>
+</body>
+</html>
