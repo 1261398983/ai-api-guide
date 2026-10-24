@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Token 花得比预期快？四个真实原因与减法清单（2026）</title>
+<meta name="description" content="同一个问题问两遍，第二次更贵——因为每次请求都要重传完整上下文。本文拆解 token 消耗的四个真实来源（上下文重传、规则文件膨胀、缓存未命中、重试放大），给出可量化的减法清单与成本估算方法。">
+<meta property="og:title" content="Token 花得比预期快？四个真实原因与减法清单">
+<meta property="og:description" content="上下文重传、规则文件膨胀、缓存未命中、重试放大——四个来源占掉大部分账单。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/token-cost.html">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/token-cost.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"Token 花得比预期快？四个真实原因与减法清单","description":"拆解 token 消耗的四个来源，并给出可量化的精简方法。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"RELAY X"}},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"为什么聊得越久，每次提问越贵？","acceptedAnswer":{"@type":"Answer","text":"因为无状态的 API 每次都要重传完整历史。第 20 轮请求要把前 19 轮的用户消息和模型回复一起发过去，输入 token 随轮数近似线性增长，账单也跟着涨。"}},
+{"@type":"Question","name":"CLAUDE.md 和规则文件很占 token 吗？","acceptedAnswer":{"@type":"Answer","text":"会。它们每次请求都会被完整注入，一个 3000 字的规则文件约等于 1500-2000 token，聊 20 轮就是 3-4 万 token 的额外输入，而这些内容你要为每一轮重复付费。"}},
+{"@type":"Question","name":"开了缓存就一定省钱吗？","acceptedAnswer":{"@type":"Answer","text":"不一定。缓存需要前缀完全一致才有命中，动态内容放在前面会让前缀失效。缓存写入通常比普通输入更贵，只有重复利用率足够高时才划算。"}}
+]}]}
+</script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b0e13;color:#c9d4e6;font:16px/1.75 -apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:48px 22px 80px}
+h1{font-size:29px;line-height:1.4;color:#eaf0fa;margin:0 0 10px}
+.sub{color:#8a99b3;font-size:14px;margin-bottom:32px}
+h2{font-size:20px;color:#e6edf8;margin:36px 0 12px;padding-left:11px;border-left:3px solid #3b7ddd}
+h3{font-size:16px;color:#cfdcf0;margin:22px 0 8px}
+p{margin:10px 0;color:#b9c6da}
+code{background:#16203a;padding:1px 6px;border-radius:4px;font-size:14px;color:#9fc4f5}
+pre{background:#0f1725;border:1px solid #1e2b42;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.7}
+pre code{background:none;padding:0;color:#c3d3ea}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+th,td{border:1px solid #1e2b42;padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#121b2b;color:#d6e3f5}
+a{color:#6ea8fe;text-decoration:none}
+a:hover{text-decoration:underline}
+.note{background:#121b2b;border-left:3px solid #3b7ddd;padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14.5px;color:#a9b8cf}
+.cta{margin:40px 0 0;padding:18px 22px;border:1px solid #24304a;border-radius:12px;background:#0e1524;font-size:14.5px}
+.cta strong{color:#e8eef9}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid #1a2437;font-size:13px;color:#697a94}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Token 花得比预期快？四个真实原因与减法清单</h1>
+<div class="sub">2026-10-24 · 先算清钱花在哪，再谈省</div>
+
+<p>多数人的第一反应是「是不是被多扣了」。先别怀疑计费——绝大多数情况是输入 token 涨得比你想象快，而输入部分往往占账单的大头。</p>
+
+<h2>一、原因一：上下文重传（最主要的那个）</h2>
+
+<p>对话式 API 是<strong>无状态</strong>的。服务端不记得你上一轮说了什么，客户端必须每次把完整历史重新发过去。</p>
+
+<p>假设每轮对话平均产生 800 token（你的问题 + 模型回复）：</p>
+
+<table>
+<tr><th>轮次</th><th>本次发送的输入 token</th><th>累计输入</th></tr>
+<tr><td>第 1 轮</td><td>约 800</td><td>800</td></tr>
+<tr><td>第 5 轮</td><td>约 4,000</td><td>12,000</td></tr>
+<tr><td>第 10 轮</td><td>约 8,000</td><td>44,000</td></tr>
+<tr><td>第 20 轮</td><td>约 16,000</td><td>168,000</td></tr>
+</table>
+
+<p>20 轮对话实际消耗的输入是总字数的 <strong>10 倍以上</strong>。这不是谁在偷扣，是无状态协议的结构性成本。</p>
+
+<div class="note">
+<strong>推论</strong>：一个 20 轮的对话，比 2 个 10 轮的对话贵得多。任务做完就新开对话，是最简单也最有效的省钱动作。
+</div>
+
+<h2>二、原因二：规则文件与工具 schema 膨胀</h2>
+
+<p><code>CLAUDE.md</code>、<code>.cursorrules</code>、系统提示、以及所有 MCP 工具的 schema，都会<strong>每轮完整注入</strong>。</p>
+
+<table>
+<tr><th>内容</th><th>大致 token</th><th>20 轮额外成本</th></tr>
+<tr><td>空规则</td><td>0</td><td>—</td></tr>
+<tr><td>3000 字规则文件</td><td>约 1,800</td><td>约 36,000</td></tr>
+<tr><td>8 个 MCP 工具 schema</td><td>约 2,500</td><td>约 50,000</td></tr>
+<tr><td>两者叠加</td><td>约 4,300</td><td><strong>约 86,000</strong></td></tr>
+</table>
+
+<p>最容易被忽略的是「装了但不用的 MCP」——工具定义照样每轮发送。一个装了几十个工具的配置，光是 schema 就能吃掉大半输入预算。</p>
+
+<h3>怎么查</h3>
+<pre><code># Claude Code 里可以直接看当前上下文的占用
+/context
+
+# 看规则文件到底多长
+wc -c CLAUDE.md .cursorrules 2>/dev/null</code></pre>
+
+<h2>三、原因三：缓存没命中</h2>
+
+<p>主流服务商都支持 prompt caching，命中后输入价格通常便宜到 <code>1/10</code>。但缓存有严格条件：</p>
+
+<table>
+<tr><th>条件</th><th>说明</th></tr>
+<tr><td>前缀完全一致</td><td>缓存按前缀匹配，中间改一个字就全失效</td></tr>
+<tr><td>静态内容在前</td><td>把规则、文档、示例放前面；把用户问题放最后</td></tr>
+<tr><td>命中窗口内</td><td>多数实现有 5 分钟级 TTL，隔久了要重新写缓存</td></tr>
+</table>
+
+<p><strong>常见错误</strong>：把时间戳、随机 ID、当次文件名放在 prompt 最前面——每次都不一样，缓存永远命中不了，还白付了缓存写入的溢价。</p>
+
+<pre><code># ❌ 动态内容在前，缓存必失效
+[2026-10-24 19:31:07] 当前文件：main.py
+<system rules ...>
+
+# ✅ 静态在前，动态在后
+<system rules ...>
+当前任务：审查 main.py（时间：19:31）</code></pre>
+
+<h2>四、原因四：重试放大</h2>
+
+<p>超时重试、429 退避重发、流式中断后重来——每一次都会产生新的计费请求，即使你最终只看到一份输出。</p>
+
+<table>
+<tr><th>场景</th><th>实际计费</th></tr>
+<tr><td>429 后立即重试 3 次</td><td>最多 4 份输入（失败请求通常也计输入）</td></tr>
+<tr><td>60 秒超时 + 自动重发</td><td>2 份输入 + 可能 1 份输出</td></tr>
+<tr><td>流式断在第 90 秒重来</td><td>前一次的输入全额计费，输出可能按已生成部分计</td></tr>
+</table>
+
+<p>所以「重试」不是免费动作。正确的做法是：<strong>拉长超时而不是立即重试</strong>，并给重试加指数退避与上限。</p>
+
+<pre><code># 典型的错误写法：无退避、无上限
+for i in range(5):
+    try: return call()
+    except: continue
+
+# 正确：指数退避 + 只对可重试错误 + 有上限
+backoff = 1
+for attempt in range(3):
+    try: return call()
+    except RateLimit as e:
+        time.sleep(backoff); backoff *= 2</code></pre>
+
+<h2>五、减法清单（按收益排序）</h2>
+
+<ol>
+<li><strong>任务做完就新开对话</strong> —— 单这一条通常能省一半以上</li>
+<li><strong>裁剪规则文件</strong> —— 只留必须的约束，删掉背景介绍和历史决策记录</li>
+<li><strong>卸载不用的 MCP / 插件</strong> —— schema 是每轮都发</li>
+<li><strong>按任务选模型</strong> —— 改错别字不必用最强模型</li>
+<li><strong>静态内容前置以命中缓存</strong> —— 顺序错了等于没开缓存</li>
+<li><strong>长任务用 <code>/compact</code> 或摘要替换历史</strong> —— 把 10 轮压成 1 段摘要</li>
+<li><strong>批量场景改异步批处理</strong> —— 多数服务商的 batch 接口有折扣</li>
+<li><strong>重试加退避与上限</strong> —— 避免一次抖动变成四次计费</li>
+</ol>
+
+<h2>六、怎么估算自己的真实花费</h2>
+
+<p>别用「字数 ÷ 4」估——中文与代码的 token 密度差很多。直接看返回体里的 <code>usage</code>：</p>
+
+<pre><code>{
+  "usage": {
+    "prompt_tokens": 12480,
+    "completion_tokens": 512,
+    "prompt_tokens_details": { "cached_tokens": 0 }
+  }
+}</code></pre>
+
+<p><code>cached_tokens: 0</code> 说明缓存没命中；<code>prompt_tokens</code> 远大于当轮字数说明历史重传在膨胀。这两个数字能定位绝大多数「钱花得莫名其妙」的情况。</p>
+
+<div class="cta">
+  <strong>本文示例端点</strong>：<code>https://api.97wl.cc/v1</code>（Anthropic 协议不带 <code>/v1</code>）<br>
+  QQ 邮箱注册，无需邀请码，按量计费，输入输出分开计价——所以「少发一点」真的会少花一点。
+  <a href="https://api.97wl.cc/register">→ 注册入口</a> · <a href="cost-compare.html">成本对照</a> · <a href="tools.html">工具配置大全</a>
+</div>
+
+<footer>
+  <a href="index.html">配置指南</a> ·
+  <a href="tools.html">工具配置大全</a> ·
+  <a href="streaming.html">流式排查</a> ·
+  <a href="why-blocked.html">连不上排查</a> ·
+  <a href="errors.html">错误码对照</a> ·
+  <a href="privacy.html">数据安全</a> ·
+  <a href="cost-compare.html">成本对照</a> ·
+  <a href="risk.html">风险自查</a> ·
+  <a href="team-keys.html">团队 Key</a> ·
+  <a href="uptime.html">延迟实测</a><br>
+  Token 数值为估算示例，实际以各服务商返回的 usage 字段为准。
+</footer>
+</div>
+</body>
+</html>
