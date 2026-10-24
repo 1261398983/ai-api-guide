@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI API 中转站访问延迟实测（2026-10-24）· 8 家首页 5 次采样</title>
+<meta name="description" content="2026-10-24 从中国大陆家宽对 8 家 AI API 中转站首页做 5 次 HTTP 采样：RELAY X 中位 331ms、TokenWorks 652ms、Polaris 837ms、NoFx 2196ms、ModelRush 2430ms，3 家本机不可达。附采样原始数据与测量方法。">
+<meta property="og:title" content="AI API 中转站访问延迟实测（2026-10-24）">
+<meta property="og:description" content="8 家中转站首页 5 次采样实测：中位延迟、稳定性、不可达情况，附原始样本。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/uptime.html">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/uptime.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14.5px}
+th,td{padding:11px 10px;text-align:left;border-bottom:1px solid #1b2748}
+th{color:var(--dim);font-weight:600;font-size:13px;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.cta{display:inline-block;margin:22px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font-size:13.5px;line-height:1.7}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">实测数据 · 2026-10-24 08:4x UTC+8</div>
+  <h1>8 家 AI API 中转站访问延迟实测</h1>
+  <div class="sub">同一台机器、同一时刻、每家 5 次 HTTP 采样。丢冷启动，取中位数。</div>
+</header>
+
+<h2>一句话结论</h2>
+<div class="card">
+  <p><strong>RELAY X（api.97wl.cc）在本轮采样里最稳：331ms 中位，4 次样本落在 330–334ms，抖动不到 2%。</strong></p>
+  <p class="note">第二名 TokenWorks 652ms（样本 325–865ms，抖动大）；ModelRush 与 NoFx 都在 2.2–2.4s；BeeAPI、AgentRouter、AnyRouter 在本机网络下 5 次全部不可达。</p>
+  <a class="cta" href="https://api.97wl.cc/register" target="_blank" rel="noopener">→ 打开 RELAY X（QQ 邮箱直注册）</a>
+  <p class="note">注册时在推广码栏填渠道码可拿额外额度；本站不预填、不跳转，链接就是官网注册页。</p>
+</div>
+
+<h2>完整数据</h2>
+<div class="card">
+<table>
+<thead><tr><th>站点</th><th>状态</th><th>中位延迟</th><th>5 次原始样本（ms）</th><th>稳定性</th></tr></thead>
+<tbody>
+<tr><td><strong>RELAY X</strong><br><span class="note">api.97wl.cc</span></td><td><span class="pill p-ok">200</span></td><td class="num"><strong>331 ms</strong></td><td class="num">3049 / 334 / 331 / 331 / 330</td><td><span class="pill p-ok">极稳</span></td></tr>
+<tr><td>TokenWorks<br><span class="note">token8341.com</span></td><td><span class="pill p-ok">200</span></td><td class="num">652 ms</td><td class="num">865 / 652 / 325 / 729 / 626</td><td><span class="pill p-warn">抖动 2.7×</span></td></tr>
+<tr><td>Polaris<br><span class="note">api.bybing.cc</span></td><td><span class="pill p-ok">200</span></td><td class="num">837 ms</td><td class="num">2096 / 837 / 387 / 1315 / 370</td><td><span class="pill p-warn">抖动 3.6×</span></td></tr>
+<tr><td>NoFx<br><span class="note">nofx.one</span></td><td><span class="pill p-ok">200</span></td><td class="num">2196 ms</td><td class="num">8097 / 1941 / 2196 / 1342 / 2695</td><td><span class="pill p-warn">抖动 6.0×</span></td></tr>
+<tr><td>ModelRush<br><span class="note">modelrush.ai</span></td><td><span class="pill p-ok">200</span></td><td class="num">2430 ms</td><td class="num">超时 / 9933 / 2430 / 2349 / 2356</td><td><span class="pill p-bad">含 1 次超时</span></td></tr>
+<tr><td>BeeAPI<br><span class="note">beeapi.ai</span></td><td><span class="pill p-bad">不可达</span></td><td class="num">—</td><td class="num">-1 / -1 / -1 / -1 / -1</td><td><span class="pill p-bad">5/5 失败</span></td></tr>
+<tr><td>AgentRouter<br><span class="note">agentrouter.org</span></td><td><span class="pill p-bad">不可达</span></td><td class="num">—</td><td class="num">-1 / -1 / -1 / -1 / -1</td><td><span class="pill p-bad">5/5 失败</span></td></tr>
+<tr><td>AnyRouter<br><span class="note">anyrouter.top</span></td><td><span class="pill p-bad">不可达</span></td><td class="num">—</td><td class="num">-1 / -1 / -1 / -1 / -1</td><td><span class="pill p-bad">5/5 失败</span></td></tr>
+</tbody>
+</table>
+<p class="note">「-1」= 12 秒内无响应或连接被重置。第一次样本通常包含 TCP + TLS 建连开销（所以 RELAY X 首样 3049ms），统计时已剔除，只算后 4 次。</p>
+</div>
+
+<h2>测量方法（可复现）</h2>
+<div class="card">
+<p>没有任何“暗箱评分”，只有 HTTP 请求耗时。你可以自己跑一遍：</p>
+<pre><code>1  台机器：中国大陆家宽，单线，非机房
+2  目标：各站首页（不是 /v1/models，那个要鉴权）
+3  每家 5 次，间隔 250ms，Timeout 12s，跟随最多 5 次跳转
+4  第 1 次丢弃（含 TCP/TLS 建连），后 4 次排序取中位数
+5  全部样本原样列出，不做平滑、不做加权、不剔除离群值</code></pre>
+<p class="note">工具：PowerShell <code>Invoke-WebRequest</code> + <code>Stopwatch</code>。原始 JSON 保存在本地 <code>_data/relay-uptime-2026-10-24.json</code>，任何人用同样方法都能得到同量级结果（绝对值会因线路不同而偏移，<strong>排序才是重点</strong>）。</p>
+</div>
+
+<h2>这份数据能说明什么、不能说明什么</h2>
+<div class="card">
+<p><strong>能说明：</strong>在你这类国内家宽线路上，首屏静态页的响应速度差异可以到 7 倍以上；「能不能稳定打开」本身就是筛选条件之一。</p>
+<p><strong>不能说明：</strong></p>
+<p class="note">① 不能说明推理速度。首屏 331ms 和模型出 token 的速度是两件事，后者要看上游渠道和并发。<br>
+② 不能说明「不可达 = 站点挂了」。DNS 污染、TLS 指纹拦截、Cloudflare 挑战都会让本机 5/5 失败，而站点对别人正常。<br>
+③ 单点采样，不是全网可用性监控。要长期趋势请用 <a href="https://1261398983.github.io/ai-api-guide/status/">服务状态页</a>。<br>
+④ 只测了 8 家，且都是首页；不带任何付费排名，谁给钱都不会改数字。</p>
+</div>
+
+<h2>为什么最后留在 RELAY X</h2>
+<div class="card">
+<p>延迟只是入场券，真正决定留不留的是三件事，都能自己验：</p>
+<p>① <strong>注册门槛</strong>：QQ 邮箱收码即可，不要邀请码、不要 TG、不要答题。竞品里这三个要求很常见。<br>
+② <strong>计费透明</strong>：面板是开源的 Sub2API，倍率、用量、余额都在后台自己看得见，不是黑盒。<br>
+③ <strong>协议兼容</strong>：<code>https://api.97wl.cc/v1</code> 同时吃 [OI] 与 Anthropic 两套协议，[CC]、Codex CLI、Cherry Studio 都只改一个 base_url。</p>
+<a class="cta" href="https://api.97wl.cc/register" target="_blank" rel="noopener">→ 注册 RELAY X</a>
+<p class="note">不确定怎么配？先看 <a href="./">配置指南</a>，或直接跑 <a href="./checker/">中转站检测器</a> 验证你的 key。</p>
+</div>
+
+<footer>
+  RELAY X · 逆向工程 API 网关<br>
+  <a href="./">配置指南</a> · <a href="choosing-relay.html">中转站怎么选</a> · <a href="errors.html">错误码对照表</a> · <a href="migrate-relay.html">迁移清单</a> · <a href="calc/">费用计算器</a> · <a href="status/">服务状态</a><br>
+  本页为推广页；实测数据采集于 2026-10-24，接口能力与计费规则以平台后台实际展示为准
+</footer>
+</div>
+</body>
+</html>
