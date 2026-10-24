@@ -40,6 +40,64 @@ code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6
 pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font-size:13.5px;line-height:1.7}
 footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "8 家 AI API 中转站访问延迟实测（2026-10-24）",
+      "description": "同一台中国大陆家宽机器，对 8 家中转站首页各做 5 次 HTTP 采样，丢弃冷启动后取中位数并公开全部原始样本。",
+      "datePublished": "2026-10-24",
+      "dateModified": "2026-10-24",
+      "inLanguage": "zh-CN",
+      "author": { "@type": "Organization", "name": "RELAY X" },
+      "publisher": { "@type": "Organization", "name": "RELAY X" },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://1261398983.github.io/ai-api-guide/uptime.html"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "这份延迟数据能说明推理速度吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "不能。测的是首页静态页的 HTTP 响应时间，与模型出 token 的速度是两件事，后者取决于上游渠道与并发。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "为什么有三家站点显示不可达？是倒闭了吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "不代表站点宕机。DNS 污染、TLS 指纹拦截、Cloudflare 挑战都会让单个网络环境下的请求全部失败，而站点对其他地区用户正常。页面里明确写了这条限制。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "延迟数据是怎么采集的，可以复现吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "同一台国内家宽机器，对每家首页发起 5 次请求，间隔 250 毫秒，12 秒超时，跟随最多 5 次跳转；丢弃含 TCP/TLS 建连的第一次，后 4 次排序取中位。全部原始样本列在页面上。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "排名是付费收录吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "不是。页面不带任何付费排名，实测数字与站点是否合作无关，原始样本公开可核对。"
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <div class="wrap">
