@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="172" height="20" role="img" aria-label="RELAY X: 100% 24h | 339ms">
-  <title>RELAY X: 100% 24h | 339ms</title>
+<svg xmlns="http://www.w3.org/2000/svg" width="172" height="20" role="img" aria-label="RELAY X: 100% 24h | 343ms">
+  <title>RELAY X: 100% 24h | 343ms</title>
   <linearGradient id="s" x2="0" y2="100%">
     <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
     <stop offset="1" stop-opacity=".1"/>
@@ -13,7 +13,7 @@
   <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">
     <text x="28" y="14" fill="#000" fill-opacity=".3">RELAY X</text>
     <text x="28" y="13">RELAY X</text>
-    <text x="114" y="14" fill="#000" fill-opacity=".3">100% 24h | 339ms</text>
-    <text x="114" y="13">100% 24h | 339ms</text>
+    <text x="114" y="14" fill="#000" fill-opacity=".3">100% 24h | 343ms</text>
+    <text x="114" y="13">100% 24h | 343ms</text>
   </g>
 </svg>
