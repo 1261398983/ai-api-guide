@@ -433,29 +433,45 @@
         "bytes": 143
       },
       "ok": true
+    },
+    {
+      "t": "2026-10-25T21:41:29.056Z",
+      "dir": {
+        "status": 200,
+        "ms": 280,
+        "ok": true,
+        "bytes": 31163
+      },
+      "api": {
+        "status": 401,
+        "ms": 38,
+        "ok": true,
+        "bytes": 143
+      },
+      "ok": true
     }
   ],
-  "updatedAt": "2026-10-25T18:58:22.265Z",
+  "updatedAt": "2026-10-25T21:41:29.056Z",
   "summary": {
     "h24": {
       "total": 7,
       "up": 7,
       "uptime": 100,
-      "avgMs": 294,
-      "p95Ms": 499
+      "avgMs": 263,
+      "p95Ms": 359
     },
     "d7": {
-      "total": 27,
-      "up": 27,
+      "total": 28,
+      "up": 28,
       "uptime": 100,
-      "avgMs": 376,
+      "avgMs": 373,
       "p95Ms": 513
     },
     "d30": {
-      "total": 27,
-      "up": 27,
+      "total": 28,
+      "up": 28,
       "uptime": 100,
-      "avgMs": 376,
+      "avgMs": 373,
       "p95Ms": 513
     }
   }
