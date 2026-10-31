@@ -801,29 +801,45 @@
         "bytes": 143
       },
       "ok": true
+    },
+    {
+      "t": "2026-10-31T05:26:05.188Z",
+      "dir": {
+        "status": 200,
+        "ms": 291,
+        "ok": true,
+        "bytes": 31162
+      },
+      "api": {
+        "status": 401,
+        "ms": 49,
+        "ok": true,
+        "bytes": 143
+      },
+      "ok": true
     }
   ],
-  "updatedAt": "2026-10-30T23:39:33.070Z",
+  "updatedAt": "2026-10-31T05:26:05.188Z",
   "summary": {
     "h24": {
       "total": 5,
       "up": 5,
       "uptime": 100,
-      "avgMs": 391,
-      "p95Ms": 714
+      "avgMs": 306,
+      "p95Ms": 565
     },
     "d7": {
       "total": 35,
       "up": 35,
       "uptime": 100,
-      "avgMs": 336,
+      "avgMs": 332,
       "p95Ms": 675
     },
     "d30": {
-      "total": 50,
-      "up": 50,
+      "total": 51,
+      "up": 51,
       "uptime": 100,
-      "avgMs": 363,
+      "avgMs": 362,
       "p95Ms": 675
     }
   }
