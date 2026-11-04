@@ -1057,29 +1057,45 @@
         "bytes": 143
       },
       "ok": true
+    },
+    {
+      "t": "2026-11-04T09:01:47.435Z",
+      "dir": {
+        "status": 200,
+        "ms": 456,
+        "ok": true,
+        "bytes": 20253
+      },
+      "api": {
+        "status": 401,
+        "ms": 58,
+        "ok": true,
+        "bytes": 143
+      },
+      "ok": true
     }
   ],
-  "updatedAt": "2026-11-04T01:16:26.560Z",
+  "updatedAt": "2026-11-04T09:01:47.436Z",
   "summary": {
     "h24": {
       "total": 4,
-      "up": 3,
-      "uptime": 75,
-      "avgMs": 358,
+      "up": 4,
+      "uptime": 100,
+      "avgMs": 382,
       "p95Ms": 492
     },
     "d7": {
       "total": 28,
       "up": 27,
       "uptime": 96.43,
-      "avgMs": 384,
+      "avgMs": 392,
       "p95Ms": 675
     },
     "d30": {
-      "total": 66,
-      "up": 65,
-      "uptime": 98.48,
-      "avgMs": 362,
+      "total": 67,
+      "up": 66,
+      "uptime": 98.51,
+      "avgMs": 363,
       "p95Ms": 582
     }
   }
