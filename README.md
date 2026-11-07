@@ -1,4 +1,4 @@
-# Sample Gateway · 逆向工程 API 网关
+# 示例网关 · 逆向工程 API 网关
 
 > 一个 Key，全套顶级模型。Claude / GPT / Gemini / Grok 全量接入，国内直连不用梯子。
 
@@ -69,7 +69,7 @@ print(resp.choices[0].message.content)
 - **国内直连** —— 无需科学上网，改一行 base_url 即可切入生产
 - **双协议兼容** —— OpenAI 与 Anthropic 格式同时支持
 - **按量计费** —— 用多少付多少，余额不过期
-- **注册门槛低** —— 仅需 QQ 邮箱，无需海外信用卡
+- **注册门槛低** —— 仅需 邮箱，无需海外信用卡
 - **完整用量明细** —— 后台可查每次调用的 token 消耗
 
 ## 选站 Checklist
@@ -85,7 +85,7 @@ print(resp.choices[0].message.content)
 | 问题 | 说明 |
 |---|---|
 | 支持哪些模型？ | Claude / GPT / Gemini / Grok 等主流系列，以后台列表为准 |
-| 必须用 QQ 邮箱吗？ | 当前注册邮箱后缀白名单为 `@qq.com` |
+| 必须用 邮箱吗？ | 当前注册邮箱后缀白名单为 `@qq.com` |
 | 余额会过期吗？ | 按量计费，余额不过期 |
 | 接口是标准格式吗？ | 兼容 OpenAI 与 Anthropic 两套协议，SDK 无需魔改 |
 | 401 / 404 报错？ | 检查 Key 是否完整、base_url 是否带 `/v1` |

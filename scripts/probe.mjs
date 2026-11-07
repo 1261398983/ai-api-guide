@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const TARGET = process.env.TARGET_URL || 'https://your-endpoint.example.com';
+const TARGET = process.env.TARGET_URL || 'your-endpoint.example.com';
 const OUT_JSON = path.join(process.cwd(), 'data', 'history.json');
 const MAX_RECORDS = 720; // 30 分钟一次 × 24 × 30 天 ≈ 1440，保留最近 720 条
 

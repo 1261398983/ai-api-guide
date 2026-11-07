@@ -35,7 +35,7 @@ const h24 = summary.h24 || {};
 const uptime = typeof h24.uptime === 'number' ? h24.uptime : null;
 const avg = typeof h24.avgMs === 'number' ? h24.avgMs : null;
 
-const left = 'Sample Gateway';
+const left = '示例网关';
 let right;
 if (uptime === null) {
   right = 'no data';
