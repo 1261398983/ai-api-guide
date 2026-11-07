@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claude Code 安装配置完整教程（2026）：从零到跑通第一个任务</title>
+<meta name="description" content="从 Node 环境检查、npm 安装、拿 API Key、配置环境变量到验证跑通，逐步给出 Claude Code 在国内可用的完整流程，附 Windows / macOS / Linux 三种写法和七个最常见的卡点。">
+<meta name="keywords" content="Claude Code 安装,Claude Code 配置,Claude Code 教程,claude code 国内,ANTHROPIC_BASE_URL,ANTHROPIC_AUTH_TOKEN,claude code npm,AI 编程工具">
+<meta name="author" content="Sample Gateway">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:title" content="Claude Code 安装配置完整教程：从零到跑通第一个任务">
+<meta property="og:description" content="Node 环境、npm 安装、环境变量、验证跑通，四步到位；附七个最常见卡点。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/claude-code-setup.html">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude Code 安装配置完整教程">
+<meta name="twitter:description" content="从零到跑通第一个任务，附七个最常见卡点。">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/claude-code-setup.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"Claude Code 安装配置完整教程（2026）","description":"从 Node 环境检查、npm 安装、拿 Key、配置环境变量到验证跑通的完整流程。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/claude-code-setup.html"}},
+{"@type":"HowTo","name":"安装并配置 Claude Code","totalTime":"PT10M","tool":[{"@type":"HowToTool","name":"Node.js 18+"},{"@type":"HowToTool","name":"npm"},{"@type":"HowToTool","name":"一个可用的 API Key"}],
+"step":[
+{"@type":"HowToStep","position":1,"name":"检查 Node 版本","text":"运行 node -v，需要 18 或更高。低于 18 会装不上或运行报错。"},
+{"@type":"HowToStep","position":2,"name":"安装 CLI","text":"npm install -g @anthropic-ai/claude-code，然后运行 claude --version 确认。"},
+{"@type":"HowToStep","position":3,"name":"设置两个环境变量","text":"ANTHROPIC_BASE_URL 指向网关地址且末尾不带 /v1；ANTHROPIC_AUTH_TOKEN 填你的 Key。变量名不是 ANTHROPIC_API_KEY。"},
+{"@type":"HowToStep","position":4,"name":"验证连通","text":"运行 claude 进入交互界面，问一句简单问题，能返回即成功。"}
+]},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Claude Code 装完提示 command not found 怎么办？","acceptedAnswer":{"@type":"Answer","text":"npm 全局 bin 目录不在 PATH 里。运行 npm config get prefix 看路径，把它下面的 bin（Windows 是根目录本身）加进 PATH，然后重开终端。"}},
+{"@type":"Question","name":"为什么环境变量设了还是 401？","acceptedAnswer":{"@type":"Answer","text":"九成是变量名写成了 ANTHROPIC_API_KEY。Claude Code 读的是 ANTHROPIC_AUTH_TOKEN。另外确认 BASE_URL 末尾没有 /v1，否则会拼成 /v1/v1/messages。"}},
+{"@type":"Question","name":"环境变量重启后就没了怎么办？","acceptedAnswer":{"@type":"Answer","text":"命令行里 export 或 $env: 只对当前会话生效。要持久化：Linux/macOS 写进 ~/.bashrc 或 ~/.zshrc；Windows 用 setx 或写进系统环境变量。也可以写进 ~/.claude/settings.json 的 env 字段。"}},
+{"@type":"Question","name":"需要多大版本号以上的 Node？","acceptedAnswer":{"@type":"Answer","text":"18 以上。16 及以下会因缺少内置 fetch 与较新的 ESM 支持而失败。推荐用 nvm 管理，切到 20 或 22 更稳。"}}
+]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{padding:10px;border-bottom:1px solid #1b2748;text-align:left}
+th{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">完整教程 · 2026-11-07</div>
+  <h1>Claude Code 安装配置完整教程</h1>
+  <div class="sub">从零到跑通第一个任务。四步能做完的事，卡住的从来不是第三步。</div>
+</header>
+
+<h2>开始之前：只有一个硬性要求</h2>
+<div class="card">
+  <p><strong>Node.js 18 或更高。</strong>低于 18 会因为缺少内置 <code>fetch</code> 和较新的 ESM 支持而装不上，报错通常是 <code>SyntaxError: Unexpected token</code> 或 <code>fetch is not defined</code>。</p>
+  <pre><button class="cp">复制</button># 先确认版本
+node -v
+npm -v
+
+# 低于 18 就升级。用 nvm 最省事：
+# macOS / Linux
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+nvm install 22 && nvm use 22
+
+# Windows 用 nvm-windows 或直接装新版安装包</pre>
+  <p>版本对了再往下。这一步跳过的人，后面所有报错都会被误判成"网络问题"。</p>
+</div>
+
+<h2>第一步：安装</h2>
+<div class="card">
+  <pre><button class="cp">复制</button>npm install -g @anthropic-ai/claude-code
+
+# 验证是否装上
+claude --version</pre>
+  <h3>装完提示 <code>command not found</code> / <code>不是内部或外部命令</code></h3>
+  <p>不是安装失败，是 npm 的全局 bin 目录不在 PATH 里。</p>
+  <pre><button class="cp">复制</button># 看全局安装路径
+npm config get prefix
+
+# macOS / Linux：把 <prefix>/bin 加进 PATH
+echo 'export PATH="$(npm config get prefix)/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# Windows：<prefix> 本身就在 PATH 里（不是它的 bin）
+# 用系统环境变量界面把 npm config get prefix 的输出加进去，然后重开终端</pre>
+  <p class="note">PowerShell 里改完 PATH 必须<strong>重开窗口</strong>才生效，当前窗口不会刷新。</p>
+</div>
+
+<h2>第二步：拿一个 API Key</h2>
+<div class="card">
+  <p>这一步取决于你用哪家的端点。三种常见来源：</p>
+  <table>
+  <thead><tr><th>来源</th><th>特点</th><th>适合</th></tr></thead>
+  <tbody>
+    <tr><td>官方 anthropic.com</td><td>最稳，需要海外支付方式</td><td>有外币卡、对稳定性要求高</td></tr>
+    <tr><td>云厂商市场</td><td>一张云账单搞定，能开票</td><td>公司采购、要报销</td></tr>
+    <tr><td>中转网关</td><td>人民币支付、国内直连</td><td>个人开发、快速试</td></tr>
+  </tbody>
+  </table>
+  <p>选哪个不影响下面的配置步骤——<strong>Claude Code 只认两个变量</strong>，端点填什么地址都行。</p>
+  <p>判断一个端点是否可用，最快的方法是不带 key 请求一次：</p>
+  <pre><button class="cp">复制</button>curl -s -o /dev/null -w '%{http_code}\n' https://你的端点/v1/models
+
+# 返回 401 = 端点活着，只是需要鉴权（正常）
+# 返回 404 = 路径不对或端点不存在
+# 返回 200 = 这个端点不校验鉴权，谨慎使用</pre>
+</div>
+
+<h2>第三步：配置（这里最容易错）</h2>
+<div class="card">
+  <p>Claude Code 读两个环境变量，<strong>名字必须一字不差</strong>：</p>
+  <table>
+  <thead><tr><th>变量</th><th>填什么</th><th>常见错误</th></tr></thead>
+  <tbody>
+    <tr><td><code>ANTHROPIC_BASE_URL</code></td><td>网关地址，<strong>末尾不带 <code>/v1</code></strong></td><td>带了会拼成 <code>/v1/v1/messages</code> → 404</td></tr>
+    <tr><td><code>ANTHROPIC_AUTH_TOKEN</code></td><td>你的 Key</td><td>写成 <code>ANTHROPIC_API_KEY</code> → 401</td></tr>
+  </tbody>
+  </table>
+
+  <h3>写法一：当前会话临时生效（最快验证）</h3>
+  <pre><button class="cp">复制</button># macOS / Linux
+export ANTHROPIC_BASE_URL="https://your-endpoint.example.com"
+export ANTHROPIC_AUTH_TOKEN="你的Key"
+claude
+
+# Windows PowerShell
+$env:ANTHROPIC_BASE_URL="https://your-endpoint.example.com"
+$env:ANTHROPIC_AUTH_TOKEN="你的Key"
+claude
+
+# Windows CMD
+set ANTHROPIC_BASE_URL=https://your-endpoint.example.com
+set ANTHROPIC_AUTH_TOKEN=你的Key
+claude</pre>
+  <p class="note">关掉终端就失效。适合先验证能不能通，别当长期方案。</p>
+
+  <h3>写法二：写进 shell 配置（持久）</h3>
+  <pre><button class="cp">复制</button># zsh
+echo 'export ANTHROPIC_BASE_URL="https://your-endpoint.example.com"' >> ~/.zshrc
+echo 'export ANTHROPIC_AUTH_TOKEN="你的Key"' >> ~/.zshrc
+source ~/.zshrc
+
+# bash
+echo 'export ANTHROPIC_BASE_URL="https://your-endpoint.example.com"' >> ~/.bashrc
+echo 'export ANTHROPIC_AUTH_TOKEN="你的Key"' >> ~/.bashrc
+source ~/.bashrc</pre>
+
+  <h3>写法三：写进配置文件（不污染 shell）</h3>
+  <pre><button class="cp">复制</button># ~/.claude/settings.json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://your-endpoint.example.com",
+    "ANTHROPIC_AUTH_TOKEN": "你的Key"
+  }
+}</pre>
+  <p>这个方式的好处：不同项目可以用不同的 key，切换时不用改 shell。缺点是明文存在文件里，注意别提交进 git。</p>
+
+  <h3>Windows 持久化</h3>
+  <pre><button class="cp">复制</button># setx 写进用户环境变量，对之后新开的窗口生效
+setx ANTHROPIC_BASE_URL "https://your-endpoint.example.com"
+setx ANTHROPIC_AUTH_TOKEN "你的Key"
+
+# 当前窗口仍需手动设一次，或直接重开</pre>
+</div>
+
+<h2>第四步：验证跑通</h2>
+<div class="card">
+  <p>不要一上来就跑大任务。按顺序做三个确认：</p>
+  <pre><button class="cp">复制</button># 1. 变量是否真的进来了
+echo $ANTHROPIC_BASE_URL       # PowerShell: $env:ANTHROPIC_BASE_URL
+echo $ANTHROPIC_AUTH_TOKEN
+
+# 2. 端点是否可达（不带 key 应返回 401）
+curl -s -o /dev/null -w '%{http_code}\n' "$ANTHROPIC_BASE_URL/v1/models"
+
+# 3. 启动交互界面
+claude</pre>
+  <p>第 3 步进去后问一句「用一句话解释这个项目的目录结构」，能正常返回就说明链路通了。</p>
+  <p>如果卡住，先看现象再查——不同报错对应完全不同的环节：</p>
+  <table>
+  <thead><tr><th>现象</th><th>大概在哪一层</th><th>先试这个</th></tr></thead>
+  <tbody>
+    <tr><td>一直转圈，无报错</td><td>DNS 或 TCP</td><td><code>nslookup 你的端点域名</code></td></tr>
+    <tr><td><code>ECONNRESET</code> / 握手失败</td><td>TLS 被干扰</td><td><code>curl -v</code> 看是否停在 handshake</td></tr>
+    <tr><td><code>401</code></td><td>变量名或 key</td><td>变量名是不是 <code>AUTH_TOKEN</code></td></tr>
+    <tr><td><code>404</code></td><td>BASE_URL 多写了 <code>/v1</code></td><td>去掉末尾 <code>/v1</code> 再试</td></tr>
+    <tr><td><code>429</code></td><td>速率限制</td><td>看响应头 <code>retry-after</code></td></tr>
+    <tr><td><code>model not found</code></td><td>模型名不存在</td><td>先 <code>curl /v1/models</code> 看清单</td></tr>
+  </tbody>
+  </table>
+  <p>更细的分层定位见 <a href="why-blocked.html">连不上？四层排查</a>，错误码逐条解释见 <a href="errors.html">错误码对照</a>。</p>
+</div>
+
+<h2>七个最常见的卡点</h2>
+<div class="card">
+  <h3>1. 变量名写成 ANTHROPIC_API_KEY</h3>
+  <p>这是最高频的一个。Claude Code 读的是 <code>ANTHROPIC_AUTH_TOKEN</code>，写错直接 401，而且报错信息不会告诉你变量名错了。</p>
+
+  <h3>2. BASE_URL 末尾带 /v1</h3>
+  <p>Claude Code 自己会拼 <code>/v1/messages</code>。你多写一个 <code>/v1</code>，实际请求变成 <code>/v1/v1/messages</code> → 404。</p>
+
+  <h3>3. export 只对当前窗口生效</h3>
+  <p>新开一个终端就没了。要持久化必须写进 <code>~/.zshrc</code> / <code>~/.bashrc</code> / <code>setx</code> / settings.json。</p>
+
+  <h3>4. Node 版本低于 18</h3>
+  <p>装不上或运行时报 <code>fetch is not defined</code>。用 <code>node -v</code> 确认，别用系统自带的旧版本。</p>
+
+  <h3>5. npm 全局 bin 不在 PATH</h3>
+  <p>装成功了但 <code>claude</code> 命令找不到。<code>npm config get prefix</code> 看路径，加进 PATH 后重开终端。</p>
+
+  <h3>6. 公司代理拦了 TLS</h3>
+  <p>浏览器能开网页不代表 curl / node 能连——很多企业代理只对浏览器放行。用 <code>curl -v</code> 单独测，不要用浏览器结果推断。</p>
+
+  <h3>7. Key 有额度但模型没开通</h3>
+  <p>返回 <code>model not found</code> 不是 key 的问题，是这个分组没开那个模型。先 <code>curl /v1/models</code> 拉清单，用清单里有的名字。</p>
+</div>
+
+<h2>配置跑通之后</h2>
+<div class="card">
+  <ul>
+    <li>想接别的工具（Cursor / Cline / Aider / Windsurf）：<a href="tools.html">13 个工具的配置片段</a></li>
+    <li>想控制成本、看清每笔花在哪：<a href="token-cost.html">省 token 的七个开关</a> · <a href="cost-compare.html">倍率不等于折扣</a></li>
+    <li>团队多人共用：<a href="team-keys.html">两层 key 的做法</a></li>
+    <li>担心代码数据流向：<a href="privacy.html">中转方能看到什么</a></li>
+    <li>流式输出断断续续：<a href="streaming.html">SSE 排查</a></li>
+  </ul>
+</div>
+
+<div class="cta">
+  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Claude Code 用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
+  QQ 邮箱注册，无需邀请码，按量计费。是否记录请求、留存多久请直接向运营方确认，本文不作保证。
+  <a href="" rel="nofollow noopener">→ 注册入口</a>
+  · <a href="./">返回指南首页</a>
+</div>
+
+</div>
+</body>
+</html>
