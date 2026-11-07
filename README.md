@@ -7,7 +7,6 @@
 **API Endpoint**
 
 ```
-https://your-endpoint.example.com/v1
 ```
 
 兼容 OpenAI 与 Anthropic 双协议，Claude Code、Codex CLI、Cherry Studio、NextChat、
@@ -20,7 +19,6 @@ LobeChat 以及任何 OpenAI SDK 项目都能直接接入，无需改动代码�
 ### Claude Code
 
 ```bash
-export ANTHROPIC_BASE_URL="https://your-endpoint.example.com"
 export ANTHROPIC_AUTH_TOKEN="你的Key"
 claude
 ```
@@ -28,7 +26,6 @@ claude
 ### Codex CLI
 
 ```bash
-export OPENAI_BASE_URL="https://your-endpoint.example.com/v1"
 export OPENAI_API_KEY="你的Key"
 codex
 ```
@@ -36,18 +33,13 @@ codex
 或写入 `~/.codex/config.toml`：
 
 ```toml
-model_provider = "removed"
 
-[model_providers.removed]
-name = "removed"
-base_url = "https://your-endpoint.example.com/v1"
 env_key = "OPENAI_API_KEY"
 ```
 
 ### Cherry Studio
 
 设置 → 模型服务 → 添加提供商 → 类型选 OpenAI → API 地址填
-`https://your-endpoint.example.com/v1` → 填入 Key → 点「检查」拉取模型列表。
 
 ### Python
 
@@ -56,7 +48,6 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="你的Key",
-    base_url="https://your-endpoint.example.com/v1",
 )
 resp = client.chat.completions.create(
     model="claude-sonnet-4-5",
@@ -68,7 +59,6 @@ print(resp.choices[0].message.content)
 ### curl 自测
 
 ```bash
-curl https://your-endpoint.example.com/v1/chat/completions \
   -H "Authorization: Bearer 你的Key" \
   -H "Content-Type: application/json" \
   -d '{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":"hi"}]}'
@@ -103,7 +93,6 @@ curl https://your-endpoint.example.com/v1/chat/completions \
 ## 在线资源
 
 - **配置指南与注册**：https://1261398983.github.io/ai-api-guide/
-- **API 端点**：https://your-endpoint.example.com/v1
 
 ---
 

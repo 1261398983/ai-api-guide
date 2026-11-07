@@ -1,33 +1,16 @@
-# removed
+# AI API 网关配置指南
 
-> AI API 中转网关：同一个 base URL 同时支持 OpenAI 与 Anthropic 两套协议。
+> Claude Code / Codex CLI / Cursor 等工具接入第三方 API 网关的配置方法、成本测算与故障排查。
 
-## 实测数据（2026-09-30）
+## 内容
 
-- 国模分组 0.08x（官网价 8%），open ai pro 分组 0.22x
-- 累计 30,734 次请求 / 40.7 亿 token / 实付 ¥28.67（平台标准价 ¥359.51）
-- 端点：GET /v1/models 1.61s、POST /v1/chat/completions 2.19s、POST /v1/responses 2.37s、POST /v1/messages 3.94s
+- 安装配置：claude-code-setup.html
+- 模型选型：model-choice.html / chinese-models.html
+- 成本：token-cost.html / cost-compare.html / prompt-caching.html
+- 排查：why-blocked.html / errors.html / streaming.html
+- 工具：tools.html / cursor-setup.html / mcp-setup.html
+- 上下文与验收：context-engineering.html / review-ai-code.html
 
-## 链接
+## 说明
 
-- 官网：https://your-endpoint.example.com
-- 注册：https://your-endpoint.example.com
-- 统一端点：https://your-endpoint.example.com/v1
-
-## 可用模型
-
-deepseek-v4-flash、deepseek-v4.1-flash、deepseek-v4-pro、glm-5.2、glm-5.3、glm-5.3-flash、kimi-k2.8、kimi-k3、minimax-m3、hy3、hy4
-
-## 指南页面
-
-- 中转站怎么选（6 条判断标准 + 5 个验证动作）：https://1261398983.github.io/ai-api-guide/choosing-relay.html
-- 换站迁移清单（Claude Code / Codex CLI / Cherry Studio / Cline）：https://1261398983.github.io/ai-api-guide/migrate-relay.html
-
-## 判断中转站是否靠谱（摘要）
-
-1. 无 key 访问 /v1/models 必须返回 401，不是 200
-2. 响应 usage 里必须有 prompt_cache_hit_tokens / prompt_cache_miss_tokens
-3. 同一 prompt 连发两次，第二次必须更便宜（缓存真实生效）
-4. 缓存读单价应在正常输入的 10% 左右，15%~30% 需警惕
-5. 同一 base_url 应同时支持 OpenAI（chat/responses）与 Anthropic（messages）
-6. 起充金额越低越安全，余额不应有有效期
+本文档为通用配置指南，不推荐任何特定服务商。示例端点使用占位符。
