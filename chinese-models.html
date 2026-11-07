@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>国产大模型写代码够用吗：三类任务的实际边界（2026）</title>
+<meta name="description" content="不比较跑分，只讲边界。把日常开发拆成「能放手 / 要盯着 / 别用」三类，给出每类的判断信号和验证方法，以及怎么用两三次真实任务自己测出你项目的分界线。">
+<meta name="keywords" content="国产大模型 编程,deepseek 写代码,glm 编程,kimi 写代码,国产模型代码能力,AI 编程选型">
+<meta name="author" content="Sample Gateway">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:title" content="国产大模型写代码够用吗：三类任务的实际边界">
+<meta property="og:description" content="不比较跑分，只讲边界。哪些能放手、哪些要盯、哪些别用。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/chinese-models.html">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="国产大模型写代码够用吗">
+<meta name="twitter:description" content="三类任务的实际边界。">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/chinese-models.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"国产大模型写代码够用吗：三类任务的实际边界","description":"把日常开发拆成能放手、要盯着、别用三类，给出判断信号与验证方法。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/chinese-models.html"}},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"国产大模型能完全替代 Claude 写代码吗？","acceptedAnswer":{"@type":"Answer","text":"在单文件、规则明确的任务上基本可以，成本还低一个数量级。跨文件重构、需要理解整体架构的任务上有明显差距：容易只改被点到的那一处，留下其他文件的引用错误。判断标准不是哪个模型强，是你的任务落在哪一类。"}},
+{"@type":"Question","name":"怎么判断一个国产模型能不能用于我的项目？","acceptedAnswer":{"@type":"Answer","text":"别信跑分，用你项目里的三件事测：一、让它在不提醒的情况下沿用你已有的错误处理风格；二、让它改一个被多处引用的函数签名，看会不会主动找调用方；三、给它一个含糊需求，看它会不会先问清而不是硬写。三件事都能过，基本就能用。"}},
+{"@type":"Question","name":"国产模型写代码便宜多少？","acceptedAnswer":{"@type":"Answer","text":"同任务下常见是一个数量级的差距，具体取决于模型和分组倍率。倍率不等于折扣，实际成本要看 token 用量乘以单价再乘倍率，还要算上失败重试的二次计费。"}},
+{"@type":"Question","name":"中文注释和文档是不是国产模型更强？","acceptedAnswer":{"@type":"Answer","text":"普遍更自然，尤其是符合国内团队习惯的表述。这方面反而是国产模型的稳定优势，不太随版本变化。"}}
+]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{padding:10px;border-bottom:1px solid #1b2748;text-align:left}
+th{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">选型判断 · 2026-11-07</div>
+  <h1>国产大模型写代码够用吗</h1>
+  <div class="sub">不比较跑分，只讲边界。跑分会过时，边界不会。</div>
+</header>
+
+<h2>先说清楚一件事</h2>
+<div class="card">
+  <p>「国产模型行不行」这个问题问错了方向。</p>
+  <p>正确的问法是：<strong>我手上这类任务，落在它的能力边界内还是外？</strong></p>
+  <p>同一批模型，做单文件 CRUD 和做跨模块重构，结论可能完全相反。
+  所以下面按<strong>任务类型</strong>分，不按模型排名分。</p>
+  <p class="note">具体型号迭代很快，本文不给型号推荐。判断框架是稳定的，
+  换一代模型只需要重新确认一遍边界在哪。</p>
+</div>
+
+<h2>第一类：能放手让它做的</h2>
+<div class="card">
+  <p>特征是<strong>规则明确、影响范围局限在单个文件、结果容易验证</strong>。</p>
+  <table>
+  <thead><tr><th>任务</th><th>为什么能做</th></tr></thead>
+  <tbody>
+    <tr><td>单个函数的实现</td><td>输入输出明确，跑一遍就知道对不对</td></tr>
+    <tr><td>CRUD 接口与数据层</td><td>模式固定，重复度高</td></tr>
+    <tr><td>脚本、数据处理、格式转换</td><td>一次性的，错了重跑就行</td></tr>
+    <tr><td>写测试、补注释、写文档</td><td>不需要判断，只需要覆盖</td></tr>
+    <tr><td>样板代码（表单、列表、分页）</td><td>结构固定，改字段名就行</td></tr>
+    <tr><td>正则、SQL、shell 命令</td><td>可即时验证</td></tr>
+    <tr><td>报错信息解释与修法建议</td><td>不需要动代码，只需要解释</td></tr>
+  </tbody>
+  </table>
+  <p><strong>这一类可以放心用便宜的档位。</strong>省钱幅度最大，质量损失最小——
+  因为任务本身不需要"理解全局"。</p>
+</div>
+
+<h2>第二类：要盯着看它改的</h2>
+<div class="card">
+  <p>特征是<strong>涉及多个文件、有隐蔽的耦合、错误不会立刻暴露</strong>。</p>
+  <table>
+  <thead><tr><th>任务</th><th>风险在哪</th></tr></thead>
+  <tbody>
+    <tr><td>改一个被多处引用的函数签名</td><td>只改定义处，调用方全留着，编译不过</td></tr>
+    <tr><td>加字段 / 改数据结构</td><td>序列化、校验、默认值容易漏一处</td></tr>
+    <tr><td>重构一个模块</td><td>行为等价性没人验证，测试覆盖不到的地方就埋雷</td></tr>
+    <tr><td>多文件功能开发</td><td>各文件风格不一致，命名和错误处理乱掉</td></tr>
+    <tr><td>处理异步 / 并发</td><td>竞态问题不会在测试里稳定复现</td></tr>
+    <tr><td>改第三方库的适配层</td><td>对库的版本差异理解不足，写出过时 API</td></tr>
+  </tbody>
+  </table>
+  <p><strong>判断信号</strong>：改完之后，你能不能在 5 分钟内说清"这次改了哪几处、为什么"。
+  说不清就说明它没理解全局，只是局部缝合。</p>
+  <p>这一类能用，但<strong>必须自己 review 每一个改动点</strong>。
+  省下的 token 钱，可能不够补 review 的时间。</p>
+</div>
+
+<h2>第三类：别让它做</h2>
+<div class="card">
+  <p>特征：<strong>错了代价高、且错误不会立刻暴露</strong>。</p>
+  <table>
+  <thead><tr><th>任务</th><th>为什么危险</th></tr></thead>
+  <tbody>
+    <tr><td>架构与技术选型</td><td>模型会给你一个"看起来合理"的方案，但不知道你的约束</td></tr>
+    <tr><td>认证 / 加密 / 权限逻辑</td><td>写出来的代码能跑，但可能有安全漏洞，且不会报错</td></tr>
+    <tr><td>疑难 bug 的根因定位</td><td>容易给出"看起来对"的解释，让你往错的方向查半天</td></tr>
+    <tr><td>数据库迁移脚本</td><td>不可逆操作，回滚成本极高</td></tr>
+    <tr><td>性能关键路径</td><td>"能跑"和"够快"差得很远，而它只保证前者</td></tr>
+    <tr><td>对外契约（API 协议、SDK）</td><td>一旦被下游依赖，改起来代价巨大</td></tr>
+  </tbody>
+  </table>
+  <p><strong>这一类的正确用法</strong>：让它给候选方案和取舍分析，
+  由你做决定，再由它执行具体实现。不要让它一步到位给出最终答案。</p>
+</div>
+
+<h2>怎么低成本测出你的边界</h2>
+<div class="card">
+  <p>不用跑分，用你项目里真实的三件事：</p>
+  <h3>测试一：风格继承</h3>
+  <p>给它一个文件，让它加一个新函数，<strong>不要在提示里说明风格要求</strong>。
+  看它会不会自动沿用你项目已有的错误处理方式、命名习惯、导入顺序。</p>
+  <p>做不到 → 每次都要你重写风格 → 它省的钱不够你改的。</p>
+
+  <h3>测试二：跨文件追踪</h3>
+  <p>让它改一个被 3 处以上引用的函数签名。<strong>不要提醒它去找调用方。</strong></p>
+  <p>看它会不会主动搜索引用、把调用方一起改掉。只改定义处就是典型的能力不足。</p>
+
+  <h3>测试三：含糊需求的反应</h3>
+  <p>给一个故意含糊的需求（"优化一下这个查询"），看它是先问"哪个指标慢"，
+  还是直接动手写一个可能没解决任何问题的版本。</p>
+  <p><strong>会问的，说明知道自己的边界；直接写的，会在真实项目里给你制造返工。</strong></p>
+
+  <p class="note">三个测试花不到半小时，比看十篇跑分文章有用。</p>
+</div>
+
+<h2>成本到底差多少</h2>
+<div class="card">
+  <p>同任务下，国产模型常见是<strong>一个数量级</strong>的差距。但要算清三件事：</p>
+  <table>
+  <thead><tr><th>项</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>倍率不是折扣</td><td>倍率乘的是站点自定义基准价，不是官方价。<a href="cost-compare.html">详见这里</a></td></tr>
+    <tr><td>失败重试二次计费</td><td>稳定性 80% 意味着平均请求 1.25 次，成本 ×1.25</td></tr>
+    <tr><td>你的 review 时间</td><td><strong>最容易被忽略的一项</strong>，通常比 token 贵得多</td></tr>
+  </tbody>
+  </table>
+  <p><strong>真实成本 = token 费用 + 返工时间。</strong>
+  一个便宜但总写错的模型，可能比贵的更费钱。</p>
+</div>
+
+<h2>推荐的混合用法</h2>
+<div class="card">
+  <table>
+  <thead><tr><th>阶段</th><th>用哪档</th><th>理由</th></tr></thead>
+  <tbody>
+    <tr><td>拆需求、写伪代码</td><td>便宜档</td><td>这步错了后面全错，但错了容易发现</td></tr>
+    <tr><td>架构判断</td><td>强档</td><td>决策错了改起来最贵</td></tr>
+    <tr><td>批量实现</td><td>便宜档</td><td>规则明确，强档没有额外收益</td></tr>
+    <tr><td>跨文件重构</td><td>强档</td><td>需要全局理解</td></tr>
+    <tr><td>安全相关代码</td><td>强档 + 人工审查</td><td>错误不会暴露</td></tr>
+    <tr><td>写测试、补文档</td><td>便宜档</td><td>典型规则活</td></tr>
+  </tbody>
+  </table>
+  <p>分档的执行细节见 <a href="model-choice.html">该用哪个模型</a>。</p>
+</div>
+
+<h2>一个诚实的补充</h2>
+<div class="card">
+  <p><strong>国产模型在中文表达上普遍更自然。</strong>写中文注释、中文文档、面向国内用户的文案，
+  这一点是稳定优势，不太随模型版本变化。</p>
+  <p>如果你的项目需要大量中文文档，这项优势值得单独计算——
+  它省的是你润色的时间，不是 token 钱。</p>
+</div>
+
+<h2>相关阅读</h2>
+<div class="card">
+  <ul>
+    <li>按任务分三档选型号：<a href="model-choice.html">该用哪个模型</a></li>
+    <li>倍率与真实成本：<a href="cost-compare.html">倍率不等于折扣</a></li>
+    <li>账单为什么涨：<a href="token-cost.html">四个真实原因</a></li>
+    <li>怎么真省钱：<a href="prompt-caching.html">Prompt Caching</a></li>
+    <li>判断端点是否可信：<a href="risk.html">七个可查信号</a></li>
+  </ul>
+</div>
+
+<div class="cta">
+  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Claude Code 用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
+  QQ 邮箱注册，无需邀请码，按量计费。模型清单与倍率以 <code>/v1/models</code> 和控制台实时数据为准，本文不给具体型号承诺。
+  <a href="" rel="nofollow noopener">→ 注册入口</a>
+  · <a href="./">返回指南首页</a>
+</div>
+
+</div>
+</body>
+</html>
