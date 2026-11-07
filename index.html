@@ -53,7 +53,7 @@ a{color:#8fb4ff}
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"AI API 网关配置指南","url":"https://1261398983.github.io/ai-api-guide/","description":"Claude / GPT / Gemini / Grok 统一端点"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"国内怎么用 Claude Code？","acceptedAnswer":{"@type":"Answer","text":"设置 ANTHROPIC_BASE_URL 指向兼容 Anthropic 协议的中转端点，ANTHROPIC_AUTH_TOKEN 填入密钥，然后运行 claude 命令。注意变量名是 ANTHROPIC_AUTH_TOKEN，不是 ANTHROPIC_API_KEY。"}},{"@type":"Question","name":"API 中转站需要外币信用卡吗？","acceptedAnswer":{"@type":"Answer","text":"不一定。部分中转站支持人民币站内支付，注册门槛低于官方渠道。具体条件以各站公告为准。"}},{"@type":"Question","name":"中转站怎么计费？","acceptedAnswer":{"@type":"Answer","text":"通常按 token 按量计费，输入与输出分开计价，分组倍率与模型倍率在控制台公开。建议小额起充，不要一次性预付大额。"}}]}]}</script>
 </head>
 <body>
-<div class="wrap">
+<main class="wrap">
 
 <header>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
@@ -168,7 +168,7 @@ const client = new OpenAI({
   本页为推广页，接口能力与计费规则以平台后台实际展示为准
 </footer>
 
-</div>
+</main>
 <script>
 document.querySelectorAll('.tab').forEach(function(b){
   b.onclick=function(){
