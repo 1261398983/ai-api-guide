@@ -115,7 +115,7 @@ model_provider = "relay"</code></pre>
 <h2>二、编辑器与 IDE</h2>
 
 <h3>Cursor</h3>
-<p>设置 → Models → Override OpenAI Base URL，填 <code>https://your-endpoint.example.com/v1</code>，key 填在同页。仅对「自带 key」模式生效，订阅模式走的是 Cursor 自己的后端。</p>
+<p>设置 → Models → Override OpenAI Base URL，填 <code>https://your-endpoint.example.com/v1</code>，key 填在同页。仅对「自带 key」模式生效，订阅模式走的是 Cursor 自己的后端。</p><p class="note">Cursor 的功能边界比较特殊（Tab 补全不走自定义 API），完整说明见 <a href="cursor-setup.html">Cursor 接入自定义 API 完整指南</a>。</p>
 
 <h3>Windsurf</h3>
 <p>设置里找 Cascade → Provider → 自定义 OpenAI 兼容端点。填 base URL 与 key 后需要重启窗口，否则新配置不加载。</p>
