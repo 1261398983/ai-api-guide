@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prompt Caching 怎么用才真省钱：cache_control 写法、命中验证与中转站的三个坑</title>
+<meta name="description" content="缓存命中后输入价格通常只有原价的十分之一，但多数人写了 cache_control 也没命中。给出完整的触发条件、用 usage 字段验证命中的方法，以及走中转站时可能白省的三种情况。">
+<meta name="keywords" content="prompt caching,cache_control,claude 缓存,缓存命中率,cache_read_input_tokens,API 省 token">
+<meta name="author" content="Sample Gateway">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:title" content="Prompt Caching 怎么用才真省钱">
+<meta property="og:description" content="cache_control 怎么写、怎么验证命中、中转站可能白省的三个坑。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/prompt-caching.html">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Prompt Caching 怎么用才真省钱">
+<meta name="twitter:description" content="大多数写了 cache_control 的人，其实一次都没命中过。">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/prompt-caching.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"Prompt Caching 怎么用才真省钱","description":"cache_control 写法、命中验证方法与中转站场景的三个坑。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/prompt-caching.html"}},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"写了 cache_control 但缓存一直不命中，为什么？","acceptedAnswer":{"@type":"Answer","text":"最常见的原因是缓存前缀里有动态内容。缓存按前缀逐字节匹配，时间戳、随机 ID、当次文件名只要出现在被标记区块之前或之内，每次请求的前缀都不同，永远命不中。"}},
+{"@type":"Question","name":"怎么确认缓存到底命中了没有？","acceptedAnswer":{"@type":"Answer","text":"看响应里的 usage 字段：cache_creation_input_tokens 是本次写入缓存的量，cache_read_input_tokens 是本次从缓存读取的量。第二次起如果 read 大于 0 就说明命中了，两个都是 0 就是没生效。"}},
+{"@type":"Question","name":"走中转站还能用缓存吗？","acceptedAnswer":{"@type":"Answer","text":"三个前提：网关要原样透传 cache_control 字段、不改写请求体（改写会破坏前缀）、并且按缓存价计费。很多中转能透传但不按缓存价算，等于你省了上游的钱、账单照收原价。用 usage 字段和实际扣费对一下就知道。"}},
+{"@type":"Question","name":"缓存有效期多久？","acceptedAnswer":{"@type":"Answer","text":"主流实现默认是分钟级（约 5 分钟），期间再次请求可命中。部分服务商支持延长到更久，但写入价格也更高。间隔太久就重新写一次缓存，不如不缓存。"}}
+]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{padding:10px;border-bottom:1px solid #1b2748;text-align:left}
+th{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">省钱机制 · 2026-11-07</div>
+  <h1>Prompt Caching 怎么用才真省钱</h1>
+  <div class="sub">写了 <code>cache_control</code> 不等于命中。大多数人一次都没命中过，还白付了写入溢价。</div>
+</header>
+
+<h2>缓存省的是哪一笔钱</h2>
+<div class="card">
+  <p>模型每次请求都要把你发过去的全部内容"读一遍"，这部分叫输入 token。
+  对话越长、文件越大，输入 token 越多——<strong>而且每轮都要重付一次</strong>。</p>
+  <p>Prompt caching 的思路：<strong>把不变的那一段存起来，下次只付读取的钱。</strong></p>
+  <table>
+  <thead><tr><th>类型</th><th>相对价格</th><th>什么时候发生</th></tr></thead>
+  <tbody>
+    <tr><td>普通输入</td><td>1×</td><td>没有被缓存的输入</td></tr>
+    <tr><td>缓存写入</td><td>约 1.25×</td><td>第一次请求，把前缀写进缓存</td></tr>
+    <tr><td><strong>缓存读取</strong></td><td><strong>约 0.1×</strong></td><td>后续请求命中同一前缀</td></tr>
+  </tbody>
+  </table>
+  <p class="note">倍数以各服务商当前定价为准，不同模型、不同有效期会有差异。
+  但量级关系不变：<strong>命中一次省的钱，远大于写一次缓存的溢价</strong>——前提是你真的命中。</p>
+</div>
+
+<h2>三个条件必须同时满足</h2>
+<div class="card">
+  <table>
+  <thead><tr><th>条件</th><th>含义</th><th>怎么违反的</th></tr></thead>
+  <tbody>
+    <tr><td><strong>前缀完全一致</strong></td><td>逐字节匹配，一个空格都算不同</td><td>把时间戳、随机 ID、文件名放进前缀</td></tr>
+    <tr><td><strong>长度达到下限</strong></td><td>太短的块不会缓存</td><td>把一段 200 字的说明标记成缓存</td></tr>
+    <tr><td><strong>在有效期内</strong></td><td>分钟级 TTL，过期要重写</td><td>隔一小时才发第二次请求</td></tr>
+  </tbody>
+  </table>
+  <p><strong>第一条是最常见的失败原因。</strong>缓存不是"相似就命中"，是"前面一模一样才命中"。</p>
+</div>
+
+<h2>cache_control 怎么写</h2>
+<div class="card">
+  <p>以 Anthropic 协议为例，把标记加在<strong>要缓存的内容块</strong>上：</p>
+  <pre><button class="cp">复制</button>{
+  "model": "claude-sonnet-4-20250514",
+  "system": [
+    {
+      "type": "text",
+      "text": "（这里放不变的规则、文档、示例，越长越值）",
+      "cache_control": { "type": "ephemeral" }
+    }
+  ],
+  "messages": [
+    { "role": "user", "content": "这次的具体问题放这里" }
+  ]
+}</pre>
+  <p><strong>关键：标记的那一块必须真的不变。</strong>把动态内容放在它后面，而不是里面。</p>
+
+  <h3>正确与错误的排列</h3>
+  <pre><button class="cp">复制</button># ❌ 动态内容混进缓存区，永远命不中
+[2026-11-07 11:46:03] 当前文件：main.py
+<你的项目规则...>
+<用户问题...>
+
+# ✅ 静态区在前并标记，动态区在后
+<你的项目规则...>          ← 标记 cache_control
+<项目文档全文...>          ← 标记 cache_control
+---
+当前任务：审查 main.py（11:46）   ← 不标记，每次可变
+用户问题：这段为什么报错？        ← 不标记</pre>
+</div>
+
+<h2>怎么验证真的命中了</h2>
+<div class="card">
+  <p>这是大多数人漏掉的一步。<strong>不看 usage 字段，你根本不知道有没有省到钱。</strong></p>
+  <p>响应里有两个关键字段：</p>
+  <table>
+  <thead><tr><th>字段</th><th>含义</th></tr></thead>
+  <tbody>
+    <tr><td><code>cache_creation_input_tokens</code></td><td>本次写进缓存的 token 数（付 1.25×）</td></tr>
+    <tr><td><code>cache_read_input_tokens</code></td><td>本次从缓存读的 token 数（付 0.1×）</td></tr>
+  </tbody>
+  </table>
+  <pre><button class="cp">复制</button>curl -s https://your-endpoint.example.com/v1/messages \
+  -H "x-api-key: 你的Key" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "content-type: application/json" \
+  -d @payload.json | jq '.usage'</pre>
+  <p>期望输出：</p>
+  <pre><button class="cp">复制</button>{
+  "input_tokens": 128,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 8420,
+  "output_tokens": 356
+}</pre>
+  <p><strong>判读方法</strong>：</p>
+  <ul>
+    <li>第一次请求：<code>cache_creation</code> 大、<code>cache_read</code> 为 0（正常，在写）</li>
+    <li>第二次起：<code>cache_read</code> 大 → <strong>命中</strong></li>
+    <li>两次都是 0 → 前缀有问题，或者端点不支持</li>
+    <li>一直 <code>cache_creation</code> 很大而 read 为 0 → <strong>每次都重写缓存，比不缓存更贵</strong></li>
+  </ul>
+  <p class="note">最后一种是最坏的情况：你以为在省钱，实际多付了 25%。</p>
+</div>
+
+<h2>走中转站的三个坑</h2>
+<div class="card">
+  <p>这是本文和大多数教程不一样的地方。<strong>用官方端点时缓存行为是确定的，走中转时不一定。</strong></p>
+
+  <h3>坑一：不透传 cache_control</h3>
+  <p>网关把请求转发给上游时，如果只挑它认识的字段，<code>cache_control</code> 会被丢掉。
+  结果：你发了标记，上游根本没收到，缓存永远不生效。</p>
+  <p><strong>验证</strong>：连发两次相同请求，看 <code>cache_read_input_tokens</code> 是否大于 0。</p>
+
+  <h3>坑二：改写了请求体</h3>
+  <p>有些网关会"规范化"请求——重排 JSON 字段、补默认值、注入自己的系统提示。
+  只要前缀变了，缓存就废了。</p>
+  <p><strong>验证</strong>：如果能拿到网关的调试日志或让运营方确认是否改写。</p>
+
+  <h3>坑三：透传了但不按缓存价计费</h3>
+  <p>最隐蔽的一个。上游按缓存价收它 0.1×，网关按普通输入价收你 1×——
+  你在 usage 里看到命中，账单却没降。</p>
+  <p><strong>验证</strong>：算一笔。<code>cache_read_input_tokens × 该模型单价 × 你的倍率</code>，
+  和实际扣费对一下。差得多就是没按缓存价算。</p>
+
+  <pre><button class="cp">复制</button># 快速对账：两笔请求的差额
+# 第二次请求的 cache_read 很大，但扣费和第 0 次差不多 → 没按缓存价算</pre>
+  <p>关于倍率怎么算，见 <a href="cost-compare.html">倍率不等于折扣</a>；
+  账单整体为什么涨，见 <a href="token-cost.html">四个真实原因</a>。</p>
+</div>
+
+<h2>什么时候缓存没用</h2>
+<div class="card">
+  <table>
+  <thead><tr><th>场景</th><th>为什么没用</th></tr></thead>
+  <tbody>
+    <tr><td>每次问的问题完全不同、没有共同前缀</td><td>没有可复用的部分</td></tr>
+    <tr><td>内容很短（几百 token）</td><td>达不到缓存下限，省的钱覆盖不了复杂度</td></tr>
+    <tr><td>请求间隔超过 TTL</td><td>每次都重新写，只付溢价不享折扣</td></tr>
+    <tr><td>一次性的批处理</td><td>同一前缀只会用到一次</td></tr>
+    <tr><td>前缀里有时间戳 / 会话 ID</td><td>每次不同，永远命不中</td></tr>
+  </tbody>
+  </table>
+  <p><strong>判断标准很简单</strong>：同一段内容在 5 分钟内会不会被重复发送？会，才值得缓存。</p>
+</div>
+
+<h2>能省多少：一个算例</h2>
+<div class="card">
+  <p>假设：系统规则 + 项目文档共 <strong>8000 token</strong>，一次会话里问 <strong>10 轮</strong>。</p>
+  <table>
+  <thead><tr><th>情况</th><th>输入 token 计费量</th></tr></thead>
+  <tbody>
+    <tr><td>不缓存</td><td>8000 × 10 = <strong>80,000</strong></td></tr>
+    <tr><td>缓存，只命中 1 次</td><td>8000×1.25（写） + 8000×0.1×1（读） + 8000×8（未命中）= <strong>74,800</strong></td></tr>
+    <tr><td>缓存，第 2 轮起全命中</td><td>8000×1.25 + 8000×0.1×9 = <strong>17,200</strong></td></tr>
+  </tbody>
+  </table>
+  <p>全命中时，<strong>输入部分的账单降到原来的 21%</strong>。
+  只命中一次时几乎没省——这就是为什么"写了 cache_control"和"真省钱"是两件事。</p>
+  <p class="note">算例只计算输入侧，输出 token 不受缓存影响，按原价计。</p>
+</div>
+
+<h2>相关阅读</h2>
+<div class="card">
+  <ul>
+    <li>账单整体为什么涨：<a href="token-cost.html">Token 花得比预期快的四个原因</a></li>
+    <li>倍率与真实成本：<a href="cost-compare.html">倍率不等于折扣</a></li>
+    <li>换模型对成本的影响：<a href="model-choice.html">按任务分三档</a></li>
+    <li>判断端点是否可信：<a href="risk.html">七个可查信号</a></li>
+  </ul>
+</div>
+
+<div class="cta">
+  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Anthropic 协议用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
+  QQ 邮箱注册，无需邀请码，按量计费。缓存是否透传、是否按缓存价计费，请直接向运营方确认——本文只给验证方法，不作保证。
+  <a href="" rel="nofollow noopener">→ 注册入口</a>
+  · <a href="./">返回指南首页</a>
+</div>
+
+</div>
+</body>
+</html>
