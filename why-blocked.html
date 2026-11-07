@@ -56,7 +56,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <h2>先分类：你看到的是哪一类错误</h2>
 <div class="card">
   <table>
-    <thead><tr><th>现象</th><th>卡住的环节</th><th>验证方式</th></tr></thead>
+    <thead><tr><th scope="col">现象</th><th scope="col">卡住的环节</th><th scope="col">验证方式</th></tr></thead>
     <tbody>
       <tr><td>一直转圈、无响应</td><td>DNS 解析或 TCP 连接</td><td>`curl -v` 看是否解析出 IP</td></tr>
       <tr><td>`ECONNRESET` / 握手失败</td><td>TLS 层被干扰</td><td>`curl -v` 卡在 TLS handshake</td></tr>
@@ -118,7 +118,7 @@ curl -s -o /dev/null -w "%{http_code}\n" https://你的中转端点/v1/models</c
 <h2>四条可选路径</h2>
 <div class="card">
   <table>
-    <thead><tr><th>路径</th><th>优点</th><th>代价</th></tr></thead>
+    <thead><tr><th scope="col">路径</th><th scope="col">优点</th><th scope="col">代价</th></tr></thead>
     <tbody>
       <tr><td>官方 + 自建代理</td><td>体验最接近官方，账号仍在自己手上</td><td>需外币卡、需维护代理、仍需处理风控</td></tr>
       <tr><td>官方 + 云厂商托管</td><td>合规票据齐全</td><td>贵，且可选模型受限</td></tr>

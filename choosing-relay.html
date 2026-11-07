@@ -60,7 +60,7 @@ a{color:#7fa8ff}
 
 <h2>一、先给结论：看这 6 条硬指标</h2>
 <table>
-<tr><th>维度</th><th>要看的硬指标</th><th>怎么验证</th></tr>
+<tr><th scope="col">维度</th><th scope="col">要看的硬指标</th><th scope="col">怎么验证</th></tr>
 <tr><td>计费透明</td><td>返回体是否给出 cache hit / miss 拆分</td><td>发一个请求看 <code>usage</code> 字段</td></tr>
 <tr><td>倍率公开</td><td>分组倍率是否写在后台</td><td>不是写在宣传页，是写在后台「可用渠道」</td></tr>
 <tr><td>缓存单价</td><td>缓存读是否显著低于正常输入</td><td>常见 10%，15%~30% 要留神</td></tr>
@@ -97,7 +97,7 @@ a{color:#7fa8ff}
 
 <h2>三、成本差在哪：一次真实调用的拆解</h2>
 <table>
-<tr><th>指标</th><th>数值</th><th>说明</th></tr>
+<tr><th scope="col">指标</th><th scope="col">数值</th><th scope="col">说明</th></tr>
 <tr><td>prompt_tokens</td><td>1,755</td><td>总输入</td></tr>
 <tr><td>prompt_cache_hit_tokens</td><td class="ok">1,536（87.5%）</td><td>走缓存读</td></tr>
 <tr><td>prompt_cache_miss_tokens</td><td>219</td><td>按正常输入计价</td></tr>
@@ -113,7 +113,7 @@ a{color:#7fa8ff}
 <h2>四、一套可复现的实测数据</h2>
 <p>下面是单账号累计数据（来自后台账单，非宣传口径）：</p>
 <table>
-<tr><th>指标</th><th>数值</th></tr>
+<tr><th scope="col">指标</th><th scope="col">数值</th></tr>
 <tr><td>累计请求</td><td>30,734 次</td></tr>
 <tr><td>累计 Token</td><td>40.7 亿</td></tr>
 <tr><td>实付</td><td>¥28.67</td></tr>
@@ -122,7 +122,7 @@ a{color:#7fa8ff}
 </table>
 <p>四端点全通（同一个 base_url）：</p>
 <table>
-<tr><th>端点</th><th>协议</th><th>结果</th><th>耗时</th></tr>
+<tr><th scope="col">端点</th><th scope="col">协议</th><th scope="col">结果</th><th scope="col">耗时</th></tr>
 <tr><td><code>GET /v1/models</code></td><td>OpenAI</td><td class="ok">200</td><td>1.61s</td></tr>
 <tr><td><code>POST /v1/chat/completions</code></td><td>OpenAI</td><td class="ok">200</td><td>2.19s</td></tr>
 <tr><td><code>POST /v1/responses</code></td><td>OpenAI Responses</td><td class="ok">200</td><td>2.37s</td></tr>

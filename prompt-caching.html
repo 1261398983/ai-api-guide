@@ -75,7 +75,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
   对话越长、文件越大，输入 token 越多——<strong>而且每轮都要重付一次</strong>。</p>
   <p>Prompt caching 的思路：<strong>把不变的那一段存起来，下次只付读取的钱。</strong></p>
   <table>
-  <thead><tr><th>类型</th><th>相对价格</th><th>什么时候发生</th></tr></thead>
+  <thead><tr><th scope="col">类型</th><th scope="col">相对价格</th><th scope="col">什么时候发生</th></tr></thead>
   <tbody>
     <tr><td>普通输入</td><td>1×</td><td>没有被缓存的输入</td></tr>
     <tr><td>缓存写入</td><td>约 1.25×</td><td>第一次请求，把前缀写进缓存</td></tr>
@@ -89,7 +89,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <h2>三个条件必须同时满足</h2>
 <div class="card">
   <table>
-  <thead><tr><th>条件</th><th>含义</th><th>怎么违反的</th></tr></thead>
+  <thead><tr><th scope="col">条件</th><th scope="col">含义</th><th scope="col">怎么违反的</th></tr></thead>
   <tbody>
     <tr><td><strong>前缀完全一致</strong></td><td>逐字节匹配，一个空格都算不同</td><td>把时间戳、随机 ID、文件名放进前缀</td></tr>
     <tr><td><strong>长度达到下限</strong></td><td>太短的块不会缓存</td><td>把一段 200 字的说明标记成缓存</td></tr>
@@ -136,7 +136,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
   <p>这是大多数人漏掉的一步。<strong>不看 usage 字段，你根本不知道有没有省到钱。</strong></p>
   <p>响应里有两个关键字段：</p>
   <table>
-  <thead><tr><th>字段</th><th>含义</th></tr></thead>
+  <thead><tr><th scope="col">字段</th><th scope="col">含义</th></tr></thead>
   <tbody>
     <tr><td><code>cache_creation_input_tokens</code></td><td>本次写进缓存的 token 数（付 1.25×）</td></tr>
     <tr><td><code>cache_read_input_tokens</code></td><td>本次从缓存读的 token 数（付 0.1×）</td></tr>
@@ -193,7 +193,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <h2>什么时候缓存没用</h2>
 <div class="card">
   <table>
-  <thead><tr><th>场景</th><th>为什么没用</th></tr></thead>
+  <thead><tr><th scope="col">场景</th><th scope="col">为什么没用</th></tr></thead>
   <tbody>
     <tr><td>每次问的问题完全不同、没有共同前缀</td><td>没有可复用的部分</td></tr>
     <tr><td>内容很短（几百 token）</td><td>达不到缓存下限，省的钱覆盖不了复杂度</td></tr>
@@ -209,7 +209,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <div class="card">
   <p>假设：系统规则 + 项目文档共 <strong>8000 token</strong>，一次会话里问 <strong>10 轮</strong>。</p>
   <table>
-  <thead><tr><th>情况</th><th>输入 token 计费量</th></tr></thead>
+  <thead><tr><th scope="col">情况</th><th scope="col">输入 token 计费量</th></tr></thead>
   <tbody>
     <tr><td>不缓存</td><td>8000 × 10 = <strong>80,000</strong></td></tr>
     <tr><td>缓存，只命中 1 次</td><td>8000×1.25（写） + 8000×0.1×1（读） + 8000×8（未命中）= <strong>74,800</strong></td></tr>

@@ -155,7 +155,7 @@ model_provider = "relay"</code></pre>
 
 <h2>五、配置完连不上时的排查顺序</h2>
 <table>
-<tr><th>现象</th><th>先查这个</th></tr>
+<tr><th scope="col">现象</th><th scope="col">先查这个</th></tr>
 <tr><td>一直转圈</td><td>DNS 是否解析（<code>nslookup your-endpoint.example.com</code>）</td></tr>
 <tr><td>401</td><td>变量名是否写错（<code>AUTH_TOKEN</code> vs <code>API_KEY</code>）</td></tr>
 <tr><td>404</td><td>base_url 是否多写或少写了 <code>/v1</code></td></tr>

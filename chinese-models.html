@@ -83,7 +83,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <div class="card">
   <p>特征是<strong>规则明确、影响范围局限在单个文件、结果容易验证</strong>。</p>
   <table>
-  <thead><tr><th>任务</th><th>为什么能做</th></tr></thead>
+  <thead><tr><th scope="col">任务</th><th scope="col">为什么能做</th></tr></thead>
   <tbody>
     <tr><td>单个函数的实现</td><td>输入输出明确，跑一遍就知道对不对</td></tr>
     <tr><td>CRUD 接口与数据层</td><td>模式固定，重复度高</td></tr>
@@ -102,7 +102,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <div class="card">
   <p>特征是<strong>涉及多个文件、有隐蔽的耦合、错误不会立刻暴露</strong>。</p>
   <table>
-  <thead><tr><th>任务</th><th>风险在哪</th></tr></thead>
+  <thead><tr><th scope="col">任务</th><th scope="col">风险在哪</th></tr></thead>
   <tbody>
     <tr><td>改一个被多处引用的函数签名</td><td>只改定义处，调用方全留着，编译不过</td></tr>
     <tr><td>加字段 / 改数据结构</td><td>序列化、校验、默认值容易漏一处</td></tr>
@@ -122,7 +122,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <div class="card">
   <p>特征：<strong>错了代价高、且错误不会立刻暴露</strong>。</p>
   <table>
-  <thead><tr><th>任务</th><th>为什么危险</th></tr></thead>
+  <thead><tr><th scope="col">任务</th><th scope="col">为什么危险</th></tr></thead>
   <tbody>
     <tr><td>架构与技术选型</td><td>模型会给你一个"看起来合理"的方案，但不知道你的约束</td></tr>
     <tr><td>认证 / 加密 / 权限逻辑</td><td>写出来的代码能跑，但可能有安全漏洞，且不会报错</td></tr>
@@ -160,7 +160,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <div class="card">
   <p>同任务下，国产模型常见是<strong>一个数量级</strong>的差距。但要算清三件事：</p>
   <table>
-  <thead><tr><th>项</th><th>说明</th></tr></thead>
+  <thead><tr><th scope="col">项</th><th scope="col">说明</th></tr></thead>
   <tbody>
     <tr><td>倍率不是折扣</td><td>倍率乘的是站点自定义基准价，不是官方价。<a href="cost-compare.html">详见这里</a></td></tr>
     <tr><td>失败重试二次计费</td><td>稳定性 80% 意味着平均请求 1.25 次，成本 ×1.25</td></tr>
@@ -174,7 +174,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <h2>推荐的混合用法</h2>
 <div class="card">
   <table>
-  <thead><tr><th>阶段</th><th>用哪档</th><th>理由</th></tr></thead>
+  <thead><tr><th scope="col">阶段</th><th scope="col">用哪档</th><th scope="col">理由</th></tr></thead>
   <tbody>
     <tr><td>拆需求、写伪代码</td><td>便宜档</td><td>这步错了后面全错，但错了容易发现</td></tr>
     <tr><td>架构判断</td><td>强档</td><td>决策错了改起来最贵</td></tr>

@@ -76,7 +76,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
   <p><strong>MCP（Model Context Protocol）</strong>是第三种方式：
   起一个独立进程（Server），由它持有凭据、执行具体操作，模型只能调用它暴露出来的工具。</p>
   <table>
-  <thead><tr><th>方式</th><th>凭据在哪</th><th>模型能做什么</th><th>风险</th></tr></thead>
+  <thead><tr><th scope="col">方式</th><th scope="col">凭据在哪</th><th scope="col">模型能做什么</th><th scope="col">风险</th></tr></thead>
   <tbody>
     <tr><td>贴数据进对话</td><td>不涉及</td><td>只能看你贴的部分</td><td>贴进去的都会上传</td></tr>
     <tr><td>直接把 key 给模型</td><td>prompt 里</td><td>理论上任何操作</td><td>凭据进上下文，可能被记录</td></tr>
@@ -133,7 +133,7 @@ claude mcp remove <名字>
 <h2>六个常用 Server，各自能干什么</h2>
 <div class="card">
   <table>
-  <thead><tr><th>Server</th><th>能力</th><th>要不要出网</th></tr></thead>
+  <thead><tr><th scope="col">Server</th><th scope="col">能力</th><th scope="col">要不要出网</th></tr></thead>
   <tbody>
     <tr><td><strong>filesystem</strong></td><td>读写指定目录下的文件（可限定路径范围）| ✅ 本地进程 |</td></tr>
     <tr><td><strong>sqlite / postgres</strong></td><td>查表、看结构、跑只读查询</td><td>本地</td></tr>
@@ -170,7 +170,7 @@ claude mcp remove <名字>
 <h2>连不上时的排查顺序</h2>
 <div class="card">
   <table>
-  <thead><tr><th>现象</th><th>先查这个</th></tr></thead>
+  <thead><tr><th scope="col">现象</th><th scope="col">先查这个</th></tr></thead>
   <tbody>
     <tr><td><code>claude mcp list</code> 里没有这个 Server</td><td>命令写错、作用域选错、配置文件路径不对</td></tr>
     <tr><td>列出来了但状态是 failed</td><td>手动跑一遍 Server 的启动命令，看它自己的报错</td></tr>

@@ -70,7 +70,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid #1a2437;font-size:1
 
 <h2>二、中转方能看到什么</h2>
 <table>
-<tr><th>可见</th><th>说明</th></tr>
+<tr><th scope="col">可见</th><th scope="col">说明</th></tr>
 <tr><td>完整 prompt</td><td>你的提问、贴进去的代码、报错栈、文件内容</td></tr>
 <tr><td>完整回复</td><td>模型输出的一切</td></tr>
 <tr><td>你的 key 与账户</td><td>用于鉴权与计费，通常以哈希或明文存储</td></tr>
@@ -91,7 +91,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid #1a2437;font-size:1
 
 <h2>三、五个该问的问题</h2>
 <table>
-<tr><th>问题</th><th>为什么重要</th></tr>
+<tr><th scope="col">问题</th><th scope="col">为什么重要</th></tr>
 <tr><td>请求内容是否落盘？</td><td>落盘就有泄露与调取风险；只在内存透传风险低一个量级</td></tr>
 <tr><td>留存多久？</td><td>「永久保留用于审计」和「24 小时滚动删除」完全不同</td></tr>
 <tr><td>谁能访问日志？</td><td>运维全员可见 vs 仅故障排查时授权</td></tr>
@@ -120,7 +120,7 @@ customer_id=8842          →  customer_id=CUSTOMER_A</code></pre>
 
 <h3>4. 分级使用，而不是一刀切</h3>
 <table>
-<tr><th>数据级别</th><th>建议</th></tr>
+<tr><th scope="col">数据级别</th><th scope="col">建议</th></tr>
 <tr><td>公开代码 / 通用问题</td><td>随便走，风险可忽略</td></tr>
 <tr><td>内部业务代码（无客户数据）</td><td>可用，但要脱敏密钥与内网地址</td></tr>
 <tr><td>客户数据 / 未公开算法 / 密钥</td><td>不要走第三方明文链路</td></tr>
@@ -131,7 +131,7 @@ customer_id=8842          →  customer_id=CUSTOMER_A</code></pre>
 
 <h2>五、和官方 API 比，风险差在哪</h2>
 <table>
-<tr><th>维度</th><th>官方直连</th><th>中转</th></tr>
+<tr><th scope="col">维度</th><th scope="col">官方直连</th><th scope="col">中转</th></tr>
 <tr><td>数据可见方</td><td>1 家（上游）</td><td><strong>2 家</strong>（上游 + 中转）</td></tr>
 <tr><td>合同与管辖</td><td>明确的服务条款</td><td>多为平台公告，约束力弱</td></tr>
 <tr><td>泄露影响面</td><td>取决于上游</td><td>多一层，且中转侧安全水平不可审计</td></tr>

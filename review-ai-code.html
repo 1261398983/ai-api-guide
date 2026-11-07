@@ -100,7 +100,7 @@ grep -rn "OldType" --include=*.ts .</pre>
   <h3>三、过度防御 / 过度简化</h3>
   <p>两个相反的极端，都很常见：</p>
   <table>
-  <thead><tr><th>表现</th><th>为什么是问题</th></tr></thead>
+  <thead><tr><th scope="col">表现</th><th scope="col">为什么是问题</th></tr></thead>
   <tbody>
     <tr><td>给每行都套 try-catch</td><td>捕获后只打日志或返回默认值，<strong>把错误吞掉了</strong></td></tr>
     <tr><td>加一堆没用的参数校验</td><td>掩盖了真正的入口校验缺失</td></tr>
@@ -120,7 +120,7 @@ grep -rn "OldType" --include=*.ts .</pre>
   <h3>五、看起来对的边界处理</h3>
   <p>最危险的一类，因为不报错。</p>
   <table>
-  <thead><tr><th>类型</th><th>典型错误</th></tr></thead>
+  <thead><tr><th scope="col">类型</th><th scope="col">典型错误</th></tr></thead>
   <tbody>
     <tr><td>off-by-one</td><td><code>&lt;</code> 写成 <code>&lt;=</code>，循环多走一次</td></tr>
     <tr><td>空值</td><td>只判 <code>null</code> 不判空字符串 / 空数组</td></tr>
@@ -137,7 +137,7 @@ grep -rn "OldType" --include=*.ts .</pre>
 <div class="card">
   <p>15 分钟内该按什么顺序看？<strong>从"机器能告诉你的"开始，越往后越需要人判断。</strong></p>
   <table>
-  <thead><tr><th>顺序</th><th>检查项</th><th>耗时</th><th>能抓出什么</th></tr></thead>
+  <thead><tr><th scope="col">顺序</th><th scope="col">检查项</th><th scope="col">耗时</th><th scope="col">能抓出什么</th></tr></thead>
   <tbody>
     <tr><td>1</td><td>编译 / 类型检查</td><td>秒级</td><td>编造 API、漏改签名</td></tr>
     <tr><td>2</td><td>跑现有测试</td><td>秒到分</td><td>行为回归</td></tr>
@@ -155,7 +155,7 @@ grep -rn "OldType" --include=*.ts .</pre>
 <div class="card">
   <p>其余可以抽查，这三类不行——<strong>因为错了不会报错</strong>。</p>
   <table>
-  <thead><tr><th>类别</th><th>为什么必须逐行</th></tr></thead>
+  <thead><tr><th scope="col">类别</th><th scope="col">为什么必须逐行</th></tr></thead>
   <tbody>
     <tr><td><strong>认证 / 加密 / 权限</strong></td><td>写出来的代码能跑，但可能有越权或弱加密。不报错，只会在某天被利用</td></tr>
     <tr><td><strong>金额 / 库存 / 计数</strong></td><td>浮点精度、并发扣减、幂等性——错一分钱也是错，且对账才发现</td></tr>

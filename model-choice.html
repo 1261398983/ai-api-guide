@@ -72,7 +72,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <h2>先给结论：按任务分三档</h2>
 <div class="card">
   <table>
-  <thead><tr><th>档位</th><th>任务特征</th><th>典型场景</th><th>选谁</th></tr></thead>
+  <thead><tr><th scope="col">档位</th><th scope="col">任务特征</th><th scope="col">典型场景</th><th scope="col">选谁</th></tr></thead>
   <tbody>
     <tr><td><strong>重推理</strong></td><td>要理解全局、跨文件、长链条</td><td>架构设计、多文件重构、疑难 bug、从零搭项目</td><td>Opus 档 / GPT 高配 / Gemini 长上下文</td></tr>
     <tr><td><strong>日常</strong></td><td>局部改动、需要一定理解</td><td>加功能、改接口、写组件、读代码回答问题</td><td>Sonnet 档（默认主力）</td></tr>
@@ -86,7 +86,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <h2>各家模型落在哪一档</h2>
 <div class="card">
   <table>
-  <thead><tr><th>模型族</th><th>重推理</th><th>日常</th><th>机械</th><th>特点</th></tr></thead>
+  <thead><tr><th scope="col">模型族</th><th scope="col">重推理</th><th scope="col">日常</th><th scope="col">机械</th><th scope="col">特点</th></tr></thead>
   <tbody>
     <tr><td><strong>Claude</strong></td><td>Opus</td><td>Sonnet</td><td>Haiku</td><td>三档分得最清楚，代码质量稳定，工具调用可靠</td></tr>
     <tr><td><strong>GPT</strong></td><td>高配档</td><td>中档</td><td>mini / nano 档</td><td>生态工具多，中文稍弱于 Claude</td></tr>
@@ -123,7 +123,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <div class="card">
   <p>最省钱的做法不是找最便宜的模型，是<strong>让每个任务落到对的档位</strong>。</p>
   <table>
-  <thead><tr><th>阶段</th><th>用什么</th><th>为什么</th></tr></thead>
+  <thead><tr><th scope="col">阶段</th><th scope="col">用什么</th><th scope="col">为什么</th></tr></thead>
   <tbody>
     <tr><td>理解需求、拆任务</td><td>日常档</td><td>这一步错了后面全错，值得用好一点</td></tr>
     <tr><td>设计整体方案</td><td>重推理档</td><td>架构判断错，改起来最贵</td></tr>

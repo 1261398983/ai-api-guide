@@ -116,7 +116,7 @@ source ~/.zshrc
 <div class="card">
   <p>这一步取决于你用哪家的端点。三种常见来源：</p>
   <table>
-  <thead><tr><th>来源</th><th>特点</th><th>适合</th></tr></thead>
+  <thead><tr><th scope="col">来源</th><th scope="col">特点</th><th scope="col">适合</th></tr></thead>
   <tbody>
     <tr><td>官方 anthropic.com</td><td>最稳，需要海外支付方式</td><td>有外币卡、对稳定性要求高</td></tr>
     <tr><td>云厂商市场</td><td>一张云账单搞定，能开票</td><td>公司采购、要报销</td></tr>
@@ -136,7 +136,7 @@ source ~/.zshrc
 <div class="card">
   <p>Claude Code 读两个环境变量，<strong>名字必须一字不差</strong>：</p>
   <table>
-  <thead><tr><th>变量</th><th>填什么</th><th>常见错误</th></tr></thead>
+  <thead><tr><th scope="col">变量</th><th scope="col">填什么</th><th scope="col">常见错误</th></tr></thead>
   <tbody>
     <tr><td><code>ANTHROPIC_BASE_URL</code></td><td>网关地址，<strong>末尾不带 <code>/v1</code></strong></td><td>带了会拼成 <code>/v1/v1/messages</code> → 404</td></tr>
     <tr><td><code>ANTHROPIC_AUTH_TOKEN</code></td><td>你的 Key</td><td>写成 <code>ANTHROPIC_API_KEY</code> → 401</td></tr>
@@ -204,7 +204,7 @@ claude</pre>
   <p>第 3 步进去后问一句「用一句话解释这个项目的目录结构」，能正常返回就说明链路通了。</p>
   <p>如果卡住，先看现象再查——不同报错对应完全不同的环节：</p>
   <table>
-  <thead><tr><th>现象</th><th>大概在哪一层</th><th>先试这个</th></tr></thead>
+  <thead><tr><th scope="col">现象</th><th scope="col">大概在哪一层</th><th scope="col">先试这个</th></tr></thead>
   <tbody>
     <tr><td>一直转圈，无报错</td><td>DNS 或 TCP</td><td><code>nslookup 你的端点域名</code></td></tr>
     <tr><td><code>ECONNRESET</code> / 握手失败</td><td>TLS 被干扰</td><td><code>curl -v</code> 看是否停在 handshake</td></tr>

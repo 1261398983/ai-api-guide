@@ -49,7 +49,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid #1a2437;font-size:1
 
 <p>流式失效有三种典型表现，原因完全不同：</p>
 <table>
-<tr><th>表现</th><th>大概率原因</th></tr>
+<tr><th scope="col">表现</th><th scope="col">大概率原因</th></tr>
 <tr><td>开了 <code>stream:true</code>，但一次性返回全部</td><td>某一层缓冲（nginx / CDN / 客户端读法）</td></tr>
 <tr><td>开始正常，吐到一半停住</td><td>代理超时（Cloudflare 100s、网关 read timeout）</td></tr>
 <tr><td>先静默几秒，然后瞬间全部出现</td><td>假流式：服务端先聚合再逐字吐</td></tr>
@@ -68,7 +68,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid #1a2437;font-size:1
 
 <p>看时间戳：</p>
 <table>
-<tr><th>时间戳形态</th><th>结论</th></tr>
+<tr><th scope="col">时间戳形态</th><th scope="col">结论</th></tr>
 <tr><td>首块很快，后续间隔几十毫秒</td><td>链路正常，问题在你的客户端</td></tr>
 <tr><td>首块就很慢，之后均匀</td><td>上游慢，不是流式问题</td></tr>
 <tr><td>静默数秒后全部块同时到达</td><td>中间层缓冲，或服务端假流式</td></tr>
@@ -118,7 +118,7 @@ while (true) {
 
 <h3>其他常见中间件</h3>
 <table>
-<tr><th>组件</th><th>要检查的点</th></tr>
+<tr><th scope="col">组件</th><th scope="col">要检查的点</th></tr>
 <tr><td>宝塔 / Nginx Proxy Manager</td><td>默认开的 gzip 与 buffering</td></tr>
 <tr><td>Apache</td><td><code>SetEnv proxy-sendchunked 1</code>、关闭 <code>mod_deflate</code></td></tr>
 <tr><td>Caddy</td><td>默认已支持流式，主要看 <code>encode</code> 指令</td></tr>
