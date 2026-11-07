@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 编程该用哪个模型：Opus / Sonnet / Haiku / GPT / DeepSeek 按任务选型</title>
+<meta name="description" content="不是所有任务都值得上最强模型。按「重推理 / 日常 / 机械」三档拆开，给出 Claude、GPT、Gemini、DeepSeek 各自的适用场景与混合省钱的搭配方式，避免用贵模型干机械活。">
+<meta name="keywords" content="claude opus 和 sonnet 区别,claude code 用哪个模型,AI 编程模型选择,deepseek 写代码,haiku 够用吗,模型对比,API 选型">
+<meta name="author" content="Sample Gateway">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:title" content="AI 编程该用哪个模型：按任务分三档选">
+<meta property="og:description" content="重推理 / 日常 / 机械 —— 三档对应不同模型，混着用能省一半以上。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/model-choice.html">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI 编程该用哪个模型：按任务分三档选">
+<meta name="twitter:description" content="不是所有任务都值得上最强模型。">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/model-choice.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"AI 编程该用哪个模型：按任务分三档选","description":"按重推理、日常、机械三档拆分任务，对应不同模型，给出混合搭配方式。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/model-choice.html"}},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Claude Code 默认用哪个模型？","acceptedAnswer":{"@type":"Answer","text":"默认走 Sonnet 档。它是日常改代码的主力：速度够、质量够、价格是 Opus 的几分之一。只有在多文件重构、疑难 bug、架构设计这类需要长链条推理的任务上，切 Opus 才有明显收益。"}},
+{"@type":"Question","name":"Haiku 能不能写代码？","acceptedAnswer":{"@type":"Answer","text":"能写，但适合局部、机械的活：补全样板、改名、加日志、格式转换、写测试桩。让它做跨文件重构或者需要理解整体架构的任务，容易改出看似合理实际跑不通的代码。"}},
+{"@type":"Question","name":"DeepSeek 和 Claude 写代码差多少？","acceptedAnswer":{"@type":"Answer","text":"常规业务代码差距不大，中文任务 DeepSeek 反而更顺手。差距集中在三处：长上下文里的细节保持、复杂重构的一致性、以及工具调用的稳定性。前两项决定了大项目里能不能放手让它改。"}},
+{"@type":"Question","name":"换模型要重新配置吗？","acceptedAnswer":{"@type":"Answer","text":"不用改端点，只改模型名。多数工具支持在会话中切换，或通过环境变量 ANTHROPIC_MODEL / 模型参数指定。切换后建议先用一个小任务验证返回是否正常。"}}
+]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{padding:10px;border-bottom:1px solid #1b2748;text-align:left}
+th{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">选型指南 · 2026-11-07</div>
+  <h1>该用哪个模型</h1>
+  <div class="sub">不是所有任务都值得上最强模型。分三档之后，账单会告诉你差别。</div>
+</header>
+
+<h2>先给结论：按任务分三档</h2>
+<div class="card">
+  <table>
+  <thead><tr><th>档位</th><th>任务特征</th><th>典型场景</th><th>选谁</th></tr></thead>
+  <tbody>
+    <tr><td><strong>重推理</strong></td><td>要理解全局、跨文件、长链条</td><td>架构设计、多文件重构、疑难 bug、从零搭项目</td><td>Opus 档 / GPT 高配 / Gemini 长上下文</td></tr>
+    <tr><td><strong>日常</strong></td><td>局部改动、需要一定理解</td><td>加功能、改接口、写组件、读代码回答问题</td><td>Sonnet 档（默认主力）</td></tr>
+    <tr><td><strong>机械</strong></td><td>规则明确、不需要判断</td><td>改名、补日志、格式转换、生成样板、写测试桩</td><td>Haiku 档 / DeepSeek</td></tr>
+  </tbody>
+  </table>
+  <p><strong>大部分人的钱是这么浪费的</strong>：拿重推理档的模型干机械活。改个变量名、加行日志也走 Opus，
+  一天下来账单翻三倍，质量一点没提升。</p>
+</div>
+
+<h2>各家模型落在哪一档</h2>
+<div class="card">
+  <table>
+  <thead><tr><th>模型族</th><th>重推理</th><th>日常</th><th>机械</th><th>特点</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Claude</strong></td><td>Opus</td><td>Sonnet</td><td>Haiku</td><td>三档分得最清楚，代码质量稳定，工具调用可靠</td></tr>
+    <tr><td><strong>GPT</strong></td><td>高配档</td><td>中档</td><td>mini / nano 档</td><td>生态工具多，中文稍弱于 Claude</td></tr>
+    <tr><td><strong>Gemini</strong></td><td>Pro 高配</td><td>Pro</td><td>Flash</td><td><strong>长上下文最强</strong>，整库读入场景优势明显</td></tr>
+    <tr><td><strong>DeepSeek</strong></td><td>—</td><td>V 系列主力</td><td>Flash / 轻量档</td><td>便宜、中文好，代码能力接近中档</td></tr>
+  </tbody>
+  </table>
+  <p class="note">具体型号一直在更新，看思路不看名字：<strong>每一代通常都有「强 / 中 / 快」三档</strong>，
+  选型逻辑不变。模型清单以 <code>curl /v1/models</code> 返回的为准。</p>
+</div>
+
+<h2>四个真正拉开差距的地方</h2>
+<div class="card">
+  <h3>1. 长上下文里的细节保持</h3>
+  <p>给它 30 个文件让它改其中一处，能不能记住另外 29 个文件的约定（命名、错误处理风格、导入顺序）。
+  这一项上强模型和中等模型差距很小，中等模型和轻量模型差距很大。</p>
+  <p><strong>判据</strong>：让它在不提醒的情况下，沿用你项目里已有的错误处理方式。做不到就说明上下文保持不够。</p>
+
+  <h3>2. 跨文件的一致性</h3>
+  <p>改一个接口，相关的调用方、类型定义、测试要不要一起改。
+  轻量模型经常只改被点到的那一处，留下十几处编译不过的引用。</p>
+  <p><strong>判据</strong>：让它改一个被多处引用的函数签名，看它会不会主动去找调用方。</p>
+
+  <h3>3. 工具调用的稳定性</h3>
+  <p>在 agent 模式下，模型要按格式输出工具调用。格式错一次，整轮就废了。
+  便宜模型在这上面的失败率明显更高，重试本身也是成本。</p>
+
+  <h3>4. 对「不知道」的诚实度</h3>
+  <p>遇到不确定的地方，是编一个看起来合理的实现，还是说"这里需要确认"。
+  <strong>这一项直接决定你要花多少时间 review</strong>，比跑分重要得多。</p>
+</div>
+
+<h2>混合用法：省一半以上</h2>
+<div class="card">
+  <p>最省钱的做法不是找最便宜的模型，是<strong>让每个任务落到对的档位</strong>。</p>
+  <table>
+  <thead><tr><th>阶段</th><th>用什么</th><th>为什么</th></tr></thead>
+  <tbody>
+    <tr><td>理解需求、拆任务</td><td>日常档</td><td>这一步错了后面全错，值得用好一点</td></tr>
+    <tr><td>设计整体方案</td><td>重推理档</td><td>架构判断错，改起来最贵</td></tr>
+    <tr><td>批量写样板代码</td><td>机械档</td><td>规则明确，好模型没有额外收益</td></tr>
+    <tr><td>核心逻辑实现</td><td>日常档</td><td>需要理解上下文，但不需要全局推理</td></tr>
+    <tr><td>疑难 bug 定位</td><td>重推理档</td><td>需要跨文件追踪调用链</td></tr>
+    <tr><td>写测试、补注释</td><td>机械档</td><td>典型的规则活</td></tr>
+    <tr><td>最后 review</td><td>重推理档</td><td>让它挑毛病，比让它写更值</td></tr>
+  </tbody>
+  </table>
+  <p>实际执行时不必这么细。<strong>一个够用的近似</strong>：默认日常档，遇到卡住超过两轮就切重推理，机械活显式切机械档。</p>
+</div>
+
+<h2>五个常见误区</h2>
+<div class="card">
+  <h3>1. 「贵的模型写代码一定更好」</h3>
+  <p>只在需要长链条推理的任务上成立。改个字段名、加个 try-catch，强模型和轻量模型输出几乎一样，
+  但价格差几倍到几十倍。</p>
+
+  <h3>2. 「用便宜模型省钱」</h3>
+  <p>如果它写出来的东西你要花 20 分钟改，那它不省钱。
+  <strong>真实成本 = token 费用 + 你的时间</strong>，后者通常更贵。</p>
+
+  <h3>3. 「模型越大上下文越长」</h3>
+  <p>上下文窗口和模型强弱是两件独立的事。Gemini 的长上下文优势在"把整个仓库读进来"这类场景，
+  不在"写代码更强"。</p>
+
+  <h3>4. 「一次切换终身使用」</h3>
+  <p>模型迭代很快，半年前的最强可能现在是中档。定期用同一批任务重测，别凭印象。</p>
+
+  <h3>5. 「便宜的中转站一定偷换了模型」</h3>
+  <p>会被换，但不是必然。验证方法很简单：发一个请求，看返回 JSON 里的 <code>model</code> 字段和你请求的是否一致。
+  不一致就是换了上游。<a href="risk.html">七个可查信号</a>里有完整验证命令。</p>
+</div>
+
+<h2>切换模型的操作</h2>
+<div class="card">
+  <p>不用改端点，只改模型名。以 Claude Code 为例：</p>
+  <pre><button class="cp">复制</button># 会话中切换（多数工具支持 /model 或等价命令）
+/model sonnet
+
+# 或用环境变量固定
+export ANTHROPIC_MODEL="claude-sonnet-4-20250514"
+
+# 先确认这个端点到底提供哪些模型
+curl -s "https://your-endpoint.example.com/v1/models" -H "Authorization: Bearer 你的Key" | head -40</pre>
+  <p class="note">切换后先跑一个小任务验证，别直接上大任务——模型名写错时，报错信息往往是
+  <code>model not found</code>，很容易被误判成网络问题。</p>
+  <p>模型名与端点实际提供的不一致时，见 <a href="errors.html">错误码对照</a>。</p>
+</div>
+
+<h2>相关阅读</h2>
+<div class="card">
+  <ul>
+    <li>想知道钱具体花在哪：<a href="token-cost.html">Token 花得比预期快的四个原因</a></li>
+    <li>想比价：<a href="cost-compare.html">倍率不等于折扣</a></li>
+    <li>想知道端点有没有偷换模型：<a href="risk.html">七个可查信号</a></li>
+    <li>刚装完还没配通：<a href="claude-code-setup.html">安装配置完整教程</a></li>
+    <li>团队多人怎么分配：<a href="team-keys.html">两层 key 的做法</a></li>
+  </ul>
+</div>
+
+<div class="cta">
+  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Claude Code 用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
+  QQ 邮箱注册，无需邀请码，按量计费。模型清单以 <code>/v1/models</code> 实时返回为准，本文不承诺具体型号长期可用。
+  <a href="" rel="nofollow noopener">→ 注册入口</a>
+  · <a href="./">返回指南首页</a>
+</div>
+
+</div>
+</body>
+</html>
