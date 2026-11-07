@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 写的代码怎么验收：按风险排序的检查清单（2026）</title>
+<meta name="description" content="逐行读 AI 生成的代码效率极低。给出五类系统性缺陷、按风险排序的检查顺序、三类必须人工逐行的情形，以及一个 15 分钟能走完的验收流程。">
+<meta name="keywords" content="AI 生成代码 review,AI 代码验收,AI 编程质量,代码审查清单,AI 代码缺陷">
+<meta name="author" content="Sample Gateway">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:title" content="AI 写的代码怎么验收：按风险排序的检查清单">
+<meta property="og:description" content="五类系统性缺陷、按风险的检查顺序、15 分钟流程。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/review-ai-code.html">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI 写的代码怎么验收">
+<meta name="twitter:description" content="不是逐行读，是按风险查。">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/review-ai-code.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"AI 写的代码怎么验收：按风险排序的检查清单","description":"五类系统性缺陷、按风险的检查顺序与 15 分钟验收流程。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/review-ai-code.html"}},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"AI 生成代码最常出的问题是什么？","acceptedAnswer":{"@type":"Answer","text":"只改被点到的那一处。改函数签名不找调用方、加字段不改序列化和校验、改数据结构不改默认值。这类问题的共同点是：局部看完全正确，放进项目就编译不过或运行报错。"}},
+{"@type":"Question","name":"怎么快速发现 AI 写的代码有问题？","acceptedAnswer":{"@type":"Answer","text":"不看代码先跑三件事：编译或类型检查、跑现有测试、用 grep 搜索被改动的标识符还有多少处引用。前两步机器会告诉你，第三步能抓出最典型的漏改。"}},
+{"@type":"Question","name":"AI 加的 try-catch 要不要保留？","acceptedAnswer":{"@type":"Answer","text":"看它捕获后做了什么。只打日志然后吞掉异常、返回 null 或默认值的，通常是掩盖问题而不是处理问题，应该删掉或改成向上抛。捕获后做了有意义的降级，可以留。"}},
+{"@type":"Question","name":"哪些代码必须人工逐行看？","acceptedAnswer":{"@type":"Answer","text":"三类：涉及认证、加密、权限的；涉及金额、库存等不可逆计算的；以及对外契约（API 协议、SDK、数据格式）。这三类错了不会报错，只会在很久之后以更难查的形式暴露。"}}
+]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{padding:10px;border-bottom:1px solid #1b2748;text-align:left}
+th{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">验收方法 · 2026-11-07</div>
+  <h1>AI 写的代码怎么验收</h1>
+  <div class="sub">逐行读是效率最低的做法。AI 的毛病有固定模式，按模式查比按行查快十倍。</div>
+</header>
+
+<h2>为什么不能逐行读</h2>
+<div class="card">
+  <p>AI 写的代码，<strong>可读性通常比人写的更好</strong>——命名规范、结构清晰、注释齐全。
+  所以你逐行读的时候，会不断得到"这写得挺对"的反馈。</p>
+  <p>问题恰恰在这里：<strong>它的错误不在行内，在行与行之间、文件与文件之间。</strong></p>
+  <p>局部看每一行都对，整体却漏了三个调用方。这种错误逐行读永远发现不了。</p>
+  <p class="note">正确的验收方式是<strong>按缺陷模式查</strong>，不是按代码行读。</p>
+</div>
+
+<h2>五类系统性缺陷</h2>
+<div class="card">
+  <p>下面五类是 AI 生成代码的高频问题，按出现频率排序。<strong>每一类都有对应的快速检查手段。</strong></p>
+
+  <h3>一、只改被点到的地方</h3>
+  <p>最常见，也最容易造成编译错误。改一个被多处引用的函数签名，它只改定义处；
+  给一个模型加字段，它只改结构体不改序列化。</p>
+  <p><strong>检查手段</strong>：改完立刻用 grep 搜被改动的标识符，数一下还有多少处引用没动。</p>
+  <pre><button class="cp">复制</button># 改了几个函数/字段，就搜几个
+grep -rn "旧函数名" --include=*.py .
+grep -rn "old_field_name" --include=*.go .
+grep -rn "OldType" --include=*.ts .</pre>
+
+  <h3>二、编造不存在的 API</h3>
+  <p>调用一个不存在的方法、传一个不存在的参数、用一个已废弃的选项。
+  <strong>它写得非常自信，格式完全正确，只是那个 API 不存在。</strong></p>
+  <p><strong>检查手段</strong>：编译或类型检查。动态语言没有编译期检查，就重点看它引用的库函数——
+  跳到定义看一眼，或者直接跑一遍。</p>
+
+  <h3>三、过度防御 / 过度简化</h3>
+  <p>两个相反的极端，都很常见：</p>
+  <table>
+  <thead><tr><th>表现</th><th>为什么是问题</th></tr></thead>
+  <tbody>
+    <tr><td>给每行都套 try-catch</td><td>捕获后只打日志或返回默认值，<strong>把错误吞掉了</strong></td></tr>
+    <tr><td>加一堆没用的参数校验</td><td>掩盖了真正的入口校验缺失</td></tr>
+    <tr><td>为了"简洁"删掉边界检查</td><td>空值、越界、除零，运行时才炸</td></tr>
+    <tr><td>把复杂逻辑简化成一行</td><td>可读性提升，但丢了原逻辑的某个分支</td></tr>
+  </tbody>
+  </table>
+  <p><strong>检查手段</strong>：搜 <code>catch</code> / <code>except</code> / <code>recover</code>，
+  逐个看它捕获后做了什么。<strong>只打日志然后继续的，基本都是错的。</strong></p>
+
+  <h3>四、风格漂移</h3>
+  <p>命名、错误处理方式、日志格式、导入顺序和你项目既有风格不一致。
+  单看没问题，放在一起像两个人写的。</p>
+  <p><strong>检查手段</strong>：看新增代码有没有复用你项目里已有的工具函数。
+  如果它自己又写了一个 <code>formatDate</code>，而项目里已经有一个，就是漂移。</p>
+
+  <h3>五、看起来对的边界处理</h3>
+  <p>最危险的一类，因为不报错。</p>
+  <table>
+  <thead><tr><th>类型</th><th>典型错误</th></tr></thead>
+  <tbody>
+    <tr><td>off-by-one</td><td><code>&lt;</code> 写成 <code>&lt;=</code>，循环多走一次</td></tr>
+    <tr><td>空值</td><td>只判 <code>null</code> 不判空字符串 / 空数组</td></tr>
+    <tr><td>并发</td><td>读写之间没有锁，测试环境永远不复现</td></tr>
+    <tr><td>时区</td><td>本地时间当 UTC 存</td></tr>
+    <tr><td>分页</td><td>最后一页多查一次，或者第一页 offset 算错</td></tr>
+  </tbody>
+  </table>
+  <p><strong>检查手段</strong>：问它"这段在边界情况下会怎样"，让它自己列出可能的输入。
+  它列不出来的，你补上测试。</p>
+</div>
+
+<h2>按风险排序的检查顺序</h2>
+<div class="card">
+  <p>15 分钟内该按什么顺序看？<strong>从"机器能告诉你的"开始，越往后越需要人判断。</strong></p>
+  <table>
+  <thead><tr><th>顺序</th><th>检查项</th><th>耗时</th><th>能抓出什么</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>编译 / 类型检查</td><td>秒级</td><td>编造 API、漏改签名</td></tr>
+    <tr><td>2</td><td>跑现有测试</td><td>秒到分</td><td>行为回归</td></tr>
+    <tr><td>3</td><td>grep 被改动的标识符</td><td>1 分钟</td><td>漏改调用方</td></tr>
+    <tr><td>4</td><td>看 catch 块做什么</td><td>2 分钟</td><td>吞异常</td></tr>
+    <tr><td>5</td><td>看边界条件</td><td>5 分钟</td><td>off-by-one、空值</td></tr>
+    <tr><td>6</td><td>看风格一致性</td><td>2 分钟</td><td>重复造轮子</td></tr>
+    <tr><td>7</td><td>看全局影响</td><td>剩余</td><td>架构层面的问题</td></tr>
+  </tbody>
+  </table>
+  <p><strong>前四是机器活，应该自动化。</strong>把它们做成提交前钩子，你只需要看后三步。</p>
+</div>
+
+<h2>三类必须人工逐行看</h2>
+<div class="card">
+  <p>其余可以抽查，这三类不行——<strong>因为错了不会报错</strong>。</p>
+  <table>
+  <thead><tr><th>类别</th><th>为什么必须逐行</th></tr></thead>
+  <tbody>
+    <tr><td><strong>认证 / 加密 / 权限</strong></td><td>写出来的代码能跑，但可能有越权或弱加密。不报错，只会在某天被利用</td></tr>
+    <tr><td><strong>金额 / 库存 / 计数</strong></td><td>浮点精度、并发扣减、幂等性——错一分钱也是错，且对账才发现</td></tr>
+    <tr><td><strong>对外契约</strong></td><td>API 协议、SDK 签名、数据格式。一旦被下游依赖，改的成本是十倍</td></tr>
+  </tbody>
+  </table>
+  <p class="note">这三类不要用便宜档模型写，也不要跳过人工审查。
+  具体选型见 <a href="model-choice.html">该用哪个模型</a> 与 <a href="chinese-models.html">国产模型边界</a>。</p>
+</div>
+
+<h2>让 AI 自己暴露问题</h2>
+<div class="card">
+  <p>与其你去找它的错，不如让它先自查。三个有效的问法：</p>
+
+  <h3>问法一：列出所有受影响的位置</h3>
+  <pre><button class="cp">复制</button>你刚才改动了 X。请列出项目中所有引用 X 的位置，
+包括测试、配置文件、文档示例。不要修改，只列出。</pre>
+  <p>它列出来的，你去核对；它漏掉的，正好就是缺陷所在。</p>
+
+  <h3>问法二：列出这段代码最可能出错的地方</h3>
+  <pre><button class="cp">复制</button>请指出这段实现里最可能出问题的三个地方，
+按可能性排序，并说明触发条件。</pre>
+  <p>好的模型能给出有价值的自我批评；差的模型会说"这段代码没有问题"——
+  <strong>这本身就是个信号</strong>。</p>
+
+  <h3>问法三：假设它是错的</h3>
+  <pre><button class="cp">复制</button>假设这段代码存在一个 bug，最可能是什么？
+给出能复现它的具体输入。</pre>
+  <p>这个问法比"检查一下有没有 bug"有效得多，因为后者会得到"看起来没问题"。</p>
+</div>
+
+<h2>一个 15 分钟的流程</h2>
+<div class="card">
+  <ol>
+    <li><strong>0-1 分钟</strong>：跑编译和测试。红的就是全部问题清单</li>
+    <li><strong>1-3 分钟</strong>：grep 改动过的标识符，看还有哪些引用没跟着改</li>
+    <li><strong>3-5 分钟</strong>：搜异常处理，检查有没有吞掉错误</li>
+    <li><strong>5-10 分钟</strong>：让它自己列出边界情况和最可能出错的地方</li>
+    <li><strong>10-13 分钟</strong>：针对它列出的点，补测试或者验证一次</li>
+    <li><strong>13-15 分钟</strong>：确认没有落到"必须逐行看"的三类里</li>
+  </ol>
+  <p><strong>超过 15 分钟还没看完，说明这次改动太大了。</strong>下次让它拆成更小的步。</p>
+</div>
+
+<h2>相关阅读</h2>
+<div class="card">
+  <ul>
+    <li>哪些任务可以放心交给它：<a href="chinese-models.html">国产模型三类边界</a></li>
+    <li>按任务选模型档位：<a href="model-choice.html">该用哪个模型</a></li>
+    <li>团队里怎么分配和追溯：<a href="team-keys.html">两层 key 的做法</a></li>
+    <li>代码发出去之前要脱敏什么：<a href="privacy.html">中转方能看到什么</a></li>
+  </ul>
+</div>
+
+<div class="cta">
+  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Claude Code 用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
+  QQ 邮箱注册，无需邀请码，按量计费。验收标准因项目而异，本文给的是通用框架，落地时按你的风险承受度调整。
+  <a href="" rel="nofollow noopener">→ 注册入口</a>
+  · <a href="./">返回指南首页</a>
+</div>
+
+</div>
+</body>
+</html>
