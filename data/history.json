@@ -1,0 +1,48 @@
+{
+  "target": "your-endpoint.example.com",
+  "startedAt": "2026-11-07T09:56:40.761Z",
+  "records": [
+    {
+      "t": "2026-11-07T09:56:40.786Z",
+      "dir": {
+        "status": 0,
+        "ms": 24,
+        "ok": false,
+        "bytes": 0,
+        "error": "Failed to parse URL from your-endpoint.example.com/"
+      },
+      "api": {
+        "status": 0,
+        "ms": 0,
+        "ok": false,
+        "bytes": 0,
+        "error": "Failed to parse URL from your-endpoint.example.com/v1/models"
+      },
+      "ok": false
+    }
+  ],
+  "updatedAt": "2026-11-07T09:56:40.786Z",
+  "summary": {
+    "h24": {
+      "total": 1,
+      "up": 0,
+      "uptime": 0,
+      "avgMs": null,
+      "p95Ms": null
+    },
+    "d7": {
+      "total": 1,
+      "up": 0,
+      "uptime": 0,
+      "avgMs": null,
+      "p95Ms": null
+    },
+    "d30": {
+      "total": 1,
+      "up": 0,
+      "uptime": 0,
+      "avgMs": null,
+      "p95Ms": null
+    }
+  }
+}
