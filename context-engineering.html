@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>怎么给 AI 提供有效上下文：三层结构、规则文件写法与会话管理（2026）</title>
+<meta name="description" content="上下文不是越多越好。给出规则 / 任务 / 参考三层结构，说明 CLAUDE.md 该写什么不该写什么、何时该新开会话、以及上下文污染的四个来源和对应处理。">
+<meta name="keywords" content="AI 上下文管理,CLAUDE.md 怎么写,上下文工程,prompt 上下文,AI 编程 规则文件,会话管理">
+<meta name="author" content="Sample Gateway">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:title" content="怎么给 AI 提供有效上下文：三层结构与会话管理">
+<meta property="og:description" content="上下文不是越多越好。写什么、放哪、何时重开。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://1261398983.github.io/ai-api-guide/context-engineering.html">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="怎么给 AI 提供有效上下文">
+<meta name="twitter:description" content="三层结构、规则文件写法、何时重开会话。">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<link rel="canonical" href="https://1261398983.github.io/ai-api-guide/context-engineering.html">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"怎么给 AI 提供有效上下文：三层结构与会话管理","description":"规则/任务/参考三层结构、规则文件写法、上下文污染处理。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/context-engineering.html"}},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"CLAUDE.md 应该写多少字？","acceptedAnswer":{"@type":"Answer","text":"越短越好，控制在几百字以内。规则文件每轮都随请求发送，写太长有两个代价：一是 token 成本，二是稀释——规则太多时模型会漏掉其中几条。只写那些「不说就会写错」的约定。"}},
+{"@type":"Question","name":"什么时候该新开一个会话？","acceptedAnswer":{"@type":"Answer","text":"三个信号：换了不相关的任务、连续两轮修不好同一个问题、或者你已经纠正它三次以上。会话里累积的错误上下文会持续影响后续判断，越早重开越省时间。"}},
+{"@type":"Question","name":"把整个代码库都给它是不是更好？","acceptedAnswer":{"@type":"Answer","text":"不是。无关文件进去只会稀释关键信息，还增加成本。正确做法是给它「入口文件 + 被改动的文件 + 相关接口定义」，让它按需自己去读其余部分。"}},
+{"@type":"Question","name":"为什么同一个问题再问一次答案会变？","acceptedAnswer":{"@type":"Answer","text":"因为上下文变了。多轮对话里每轮都会重发全部历史，前面说过的错误结论会持续影响后续。遇到这种情况，把有效信息提炼成新的简短描述，开一个新会话重问，通常比继续纠缠有效。"}}
+]}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c18;--card:#101731;--line:#22305e;--txt:#e8ecf8;--dim:#93a0c4;--acc:#5b8cff;--acc2:#a06bff;--ok:#31d68f;--warn:#f5b544;--bad:#ff6b7a}
+body{background:radial-gradient(1100px 700px at 15% -10%,#1c2a63 0%,transparent 60%),radial-gradient(900px 600px at 95% 5%,#3a1d63 0%,transparent 55%),var(--bg);color:var(--txt);font:16px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;padding:0 16px 80px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding:52px 0 20px;text-align:center}
+.badge{display:inline-block;padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px;margin-bottom:16px}
+h1{font-size:clamp(26px,4.6vw,40px);line-height:1.28;font-weight:800;background:linear-gradient(92deg,#8fb4ff,#c39bff 55%,#8ff0d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:14px;font-size:16px}
+h2{font-size:21px;margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+h3{font-size:16.5px;margin:22px 0 8px;color:#dbe6ff}
+p{color:#cfd7ee;margin:12px 0}
+a{color:#8fb8e8}
+.card{background:linear-gradient(180deg,var(--card),#0c1327);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+ol,ul{color:#cfd7ee;margin:12px 0 12px 22px}
+li{margin:7px 0}
+.note{font-size:13.5px;color:var(--dim)}
+code{background:#0b1226;border:1px solid #1c294d;border-radius:6px;padding:2px 6px;font-size:13.5px}
+pre{background:#0b1226;border:1px solid #1c294d;border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.7 "Cascadia Mono",Consolas,monospace;color:#cfe0ff}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{padding:10px;border-bottom:1px solid #1b2748;text-align:left}
+th{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.p-bad{background:rgba(255,107,122,.14);color:var(--bad)}
+.p-warn{background:rgba(245,181,68,.14);color:var(--warn)}
+.p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
+.cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
+footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
+</style>
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">上下文工程 · 2026-11-07</div>
+  <h1>怎么给 AI 提供有效上下文</h1>
+  <div class="sub">上下文不是越多越好。塞满了它反而记不住关键的那几条。</div>
+</header>
+
+<h2>先破除一个直觉</h2>
+<div class="card">
+  <p>直觉是：信息给得越多，回答越准。</p>
+  <p>实际是<strong>倒 U 型</strong>：给太少它不知道你在说什么；给太多，关键指令被淹没在无关内容里。</p>
+  <p>这个现象叫<strong>上下文稀释</strong>。你的规则文件写了 3000 字，
+  它可能只记住了开头两条和最后一条——中间的被稀释掉了。</p>
+  <table>
+  <thead><tr><th>信息量</th><th>结果</th></tr></thead>
+  <tbody>
+    <tr><td>太少（只说"改这个函数"）</td><td>改得不符合项目约定</td></tr>
+    <tr><td><strong>刚好（规则 + 目标文件 + 相关接口）</strong></td><td>准确率高</td></tr>
+    <tr><td>太多（整个仓库 + 三千字规则）</td><td>关键约束被稀释，还多花钱</td></tr>
+  </tbody>
+  </table>
+</div>
+
+<h2>三层结构：把信息放到对的位置</h2>
+<div class="card">
+  <p>有效的上下文不是一坨，是分层的。<strong>每层的生命周期和更新频率不同。</strong></p>
+  <table>
+  <thead><tr><th>层</th><th>内容</th><th>更新频率</th><th>放哪</th></tr></thead>
+  <tbody>
+    <tr><td><strong>规则层</strong></td><td>项目约定：命名、错误处理、目录结构、禁止事项</td><td>很少变</td><td>CLAUDE.md / .cursorrules</td></tr>
+    <tr><td><strong>任务层</strong></td><td>这次要做什么、验收标准是什么</td><td>每轮变</td><td>对话内容</td></tr>
+    <tr><td><strong>参考层</strong></td><td>相关文件、接口定义、示例代码</td><td>按需</td><td>让它自己去读，或贴关键片段</td></tr>
+  </tbody>
+  </table>
+  <p><strong>最常见的问题是把参考层的内容塞进规则层。</strong>
+  规则文件里贴了 20 个代码示例，每次请求都重发，既贵又稀释。</p>
+</div>
+
+<h2>规则文件该写什么</h2>
+<div class="card">
+  <p>判断标准只有一条：<strong>这条不写，它就会写错吗？</strong></p>
+  <p>会，才写。不会，就别占用预算。</p>
+
+  <h3>该写的（四类）</h3>
+  <table>
+  <thead><tr><th>类别</th><th>例子</th></tr></thead>
+  <tbody>
+    <tr><td>反直觉的约定</td><td>「本项目错误统一用 Result 类型，不抛异常」</td></tr>
+    <tr><td>禁止事项</td><td>「不要引入新的第三方依赖」「不要改 migrations 目录」</td></tr>
+    <tr><td>入口位置</td><td>「API 路由在 src/routes/，每个文件导出一个 router」</td></tr>
+    <tr><td>验证方式</td><td>「改完跑 make test，不要跑全量」</td></tr>
+  </tbody>
+  </table>
+
+  <h3>不该写的（四类）</h3>
+  <table>
+  <thead><tr><th>类别</th><th>为什么不该写</th></tr></thead>
+  <tbody>
+    <tr><td>它默认就会做对的事</td><td>「请写规范的代码」「注意错误处理」——废话，白占预算</td></tr>
+    <tr><td>代码示例</td><td>占地方且容易过时；需要时让它读实际文件</td></tr>
+    <tr><td>历史变更记录</td><td>「v1 用的 X，v2 改成 Y」——它只需要知道现在是什么</td></tr>
+    <tr><td>完整目录树</td><td>几十行路径，它记不住也用不上</td></tr>
+  </tbody>
+  </table>
+
+  <h3>一个克制的模板</h3>
+  <pre><button class="cp">复制</button># 项目约定
+
+## 结构
+- API 路由：src/routes/*.ts，每文件导出一个 router
+- 业务逻辑：src/services/，不直接碰 DB
+- 数据访问：src/repo/，所有 SQL 在这里
+
+## 必须遵守
+- 错误统一用 Result&lt;T, E&gt;，不抛异常
+- 新增依赖前先问，不要自作主张
+- migrations/ 目录只读，不要改历史迁移
+
+## 验证
+- 改完跑 `make test-unit`（约 20 秒）
+- 不要跑全量测试，太慢
+
+## 禁止
+- 不要用 any
+- 不要写 console.log，用 logger</pre>
+  <p class="note">这个模板约 200 字。如果你的规则文件超过 1000 字，
+  先问自己：删掉哪些，它仍然不会写错？</p>
+</div>
+
+<h2>参考层：让它自己读，不是全塞进去</h2>
+<div class="card">
+  <p>正确做法不是把相关文件内容贴进对话，而是<strong>告诉它去哪读</strong>。</p>
+  <pre><button class="cp">复制</button>❌ 贴进来
+以下是 UserService.ts 的全部内容：（800 行）
+以下是 UserRepo.ts 的全部内容：（600 行）
+请修改用户昵称的校验逻辑
+
+✅ 指路径
+修改 src/services/UserService.ts 里的昵称校验。
+校验规则参考 src/utils/validators.ts 里已有的实现，
+数据访问走 src/repo/UserRepo.ts 的 updateUser。</pre>
+  <p><strong>好处有三</strong>：省 token、它读的是最新版本、以及它会自己找到你没提到的依赖。</p>
+  <p>什么时候该贴？<strong>这段代码它读不到</strong>——比如报错堆栈、日志片段、
+  或者不在仓库里的第三方接口文档。</p>
+</div>
+
+<h2>会话管理：什么时候该重开</h2>
+<div class="card">
+  <p>多轮对话里，<strong>每一轮都会重发全部历史</strong>。这意味着前面的错误结论会持续污染后续判断。</p>
+
+  <h3>四个应该重开的信号</h3>
+  <table>
+  <thead><tr><th>信号</th><th>为什么</th></tr></thead>
+  <tbody>
+    <tr><td>换了不相关的任务</td><td>上一个任务的上下文全是噪音</td></tr>
+    <tr><td>连续两轮修不好同一个问题</td><td>它已经在错误的思路上越走越远</td></tr>
+    <tr><td>你已经纠正它三次以上</td><td>纠正记录本身成了负担，它开始围绕你的措辞猜</td></tr>
+    <tr><td>它开始重复之前说过的话</td><td>上下文接近饱和，开始打转</td></tr>
+  </tbody>
+  </table>
+
+  <h3>重开时怎么保住有用信息</h3>
+  <p>不要复制整段对话。提炼成三句话：</p>
+  <pre><button class="cp">复制</button>背景：这是一个 Express + Prisma 项目，用户模块在 src/services/UserService.ts。
+已确认：昵称校验应该复用 validators.ts 里的 validateNickname，
+        不要新建一套规则。
+目标：改 UserService.ts 的 updateProfile，让它调用 validateNickname。</pre>
+  <p><strong>三句话的信息密度，比两百轮对话高。</strong></p>
+</div>
+
+<h2>上下文污染的四个来源</h2>
+<div class="card">
+  <table>
+  <thead><tr><th>来源</th><th>表现</th><th>处理</th></tr></thead>
+  <tbody>
+    <tr><td><strong>失败尝试</strong></td><td>它试过三种错方案，第四种还是绕着那三条转</td><td>重开会话，只描述正确方向</td></tr>
+    <tr><td><strong>错误的既有结论</strong></td><td>早期你随口说"应该是 X 的问题"，它一直按 X 排查</td><td>明确说「X 已排除」</td></tr>
+    <tr><td><strong>过大的文件内容</strong></td><td>贴了 800 行代码，真正相关的 20 行被淹没</td><td>只贴相关片段 + 文件路径</td></tr>
+    <tr><td><strong>无关的历史任务</strong></td><td>会话里做过五个不相关的事</td><td>一任务一会话</td></tr>
+  </tbody>
+  </table>
+  <p class="note">第一条最隐蔽：<strong>它不会告诉你"我之前试错了"，只会继续在错的思路上加码。</strong></p>
+</div>
+
+<h2>一个可复用的提问结构</h2>
+<div class="card">
+  <p>把一次请求写成五段，比写一大段话有效：</p>
+  <pre><button class="cp">复制</button>【目标】一句话说明要达成什么
+【范围】改哪个文件/函数，不要碰什么
+【约束】必须遵守的约定（错误处理方式、依赖限制）
+【参考】去哪读相关代码，不要贴全文
+【验收】怎么算完成（测试命令、预期行为）</pre>
+  <p>不一定要写这么正式，但<strong>心里要有这五段</strong>。
+  缺哪段，它就会在那方面猜——而猜错的部分，正是你要返工的部分。</p>
+</div>
+
+<h2>相关阅读</h2>
+<div class="card">
+  <ul>
+    <li>上下文重传是账单主因：<a href="token-cost.html">四个真实原因</a></li>
+    <li>缓存能让重复前缀便宜十倍：<a href="prompt-caching.html">Prompt Caching</a></li>
+    <li>写出来之后怎么验收：<a href="review-ai-code.html">AI 代码验收清单</a></li>
+    <li>按任务选模型档位：<a href="model-choice.html">该用哪个模型</a></li>
+  </ul>
+</div>
+
+<div class="cta">
+  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Claude Code 用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
+  QQ 邮箱注册，无需邀请码，按量计费。规则文件的具体字段名各工具不同，以你所用工当前文档为准；本文给的是组织方法。
+  <a href="" rel="nofollow noopener">→ 注册入口</a>
+  · <a href="./">返回指南首页</a>
+</div>
+
+</div>
+</body>
+</html>
