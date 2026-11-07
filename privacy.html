@@ -141,6 +141,8 @@ customer_id=8842          →  customer_id=CUSTOMER_A</code></pre>
 </table>
 <p>结论不是「别用」，而是<strong>把「省下的钱」和「多一层可见方」放在一起权衡</strong>。公开代码、学习场景、个人项目，这一层风险通常可以接受；客户数据和生产密钥，通常不必冒。</p>
 
+<p class="note">MCP Server 会扩大数据可见面：<a href="mcp-setup.html">MCP 的安全边界</a>。</p>
+
 <div class="cta">
 <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Anthropic 协议不带 <code>/v1</code>）<br>
   第三方转发服务，<strong>同样属于「多一层可见方」</strong>；是否记录、留存多久请直接向运营方确认，本文不给保证。
