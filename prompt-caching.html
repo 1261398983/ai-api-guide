@@ -6,24 +6,24 @@
 <title>Prompt Caching 怎么用才真省钱：cache_control 写法、命中验证与中转站的三个坑</title>
 <meta name="description" content="缓存命中后输入价格通常只有原价的十分之一，但多数人写了 cache_control 也没命中。给出完整的触发条件、用 usage 字段验证命中的方法，以及走中转站时可能白省的三种情况。">
 <meta name="keywords" content="prompt caching,cache_control,claude 缓存,缓存命中率,cache_read_input_tokens,API 省 token">
-<meta name="author" content="Sample Gateway">
+<meta name="author" content="示例网关">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:title" content="Prompt Caching 怎么用才真省钱">
 <meta property="og:description" content="cache_control 怎么写、怎么验证命中、中转站可能白省的三个坑。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/prompt-caching.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
-<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
+<meta property="og:site_name" content="配置指南">
 <meta property="og:locale" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Prompt Caching 怎么用才真省钱">
 <meta name="twitter:description" content="大多数写了 cache_control 的人，其实一次都没命中过。">
-<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/prompt-caching.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Article","headline":"Prompt Caching 怎么用才真省钱","description":"cache_control 写法、命中验证方法与中转站场景的三个坑。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/prompt-caching.html"}},
+{"@type":"Article","headline":"Prompt Caching 怎么用才真省钱","description":"cache_control 写法、命中验证方法与中转站场景的三个坑。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/prompt-caching.html"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"写了 cache_control 但缓存一直不命中，为什么？","acceptedAnswer":{"@type":"Answer","text":"最常见的原因是缓存前缀里有动态内容。缓存按前缀逐字节匹配，时间戳、随机 ID、当次文件名只要出现在被标记区块之前或之内，每次请求的前缀都不同，永远命不中。"}},
 {"@type":"Question","name":"怎么确认缓存到底命中了没有？","acceptedAnswer":{"@type":"Answer","text":"看响应里的 usage 字段：cache_creation_input_tokens 是本次写入缓存的量，cache_read_input_tokens 是本次从缓存读取的量。第二次起如果 read 大于 0 就说明命中了，两个都是 0 就是没生效。"}},
@@ -60,7 +60,6 @@ th{color:var(--dim);font-size:13px}
 .p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
 .cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
 footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
-</style>
 </style>
 </head>
 <body>
@@ -237,12 +236,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 
 <p class="note">缓存的前提是前缀稳定，这依赖上下文组织方式：<a href="context-engineering.html">怎么组织上下文</a>。</p>
 
-<div class="cta">
-  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Anthropic 协议用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
-  QQ 邮箱注册，无需邀请码，按量计费。缓存是否透传、是否按缓存价计费，请直接向运营方确认——本文只给验证方法，不作保证。
-  <a href="" rel="nofollow noopener">→ 注册入口</a>
-  · <a href="./">返回指南首页</a>
-</div>
+<p class="note"><a href="./">← 返回指南首页</a></p>
 
 </div>
 </body>

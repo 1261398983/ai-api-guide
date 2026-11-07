@@ -6,24 +6,24 @@
 <title>Claude Code 配置 MCP：加 Server、常用清单与安全边界（2026）</title>
 <meta name="description" content="MCP 让 AI 能真正读你的数据库、查文档、操作浏览器。给出 claude mcp add 的命令写法、项目级 .mcp.json 配置、六个常用 Server 的实际能力，以及它为什么会成为新的数据泄露面。">
 <meta name="keywords" content="claude code mcp,MCP 配置,mcp server,model context protocol,mcp 安全,claude mcp add">
-<meta name="author" content="Sample Gateway">
+<meta name="author" content="示例网关">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:title" content="Claude Code 配置 MCP：加 Server、常用清单与安全边界">
 <meta property="og:description" content="MCP 让 AI 能读数据库、查文档、开浏览器——也让它成为新的泄露面。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/mcp-setup.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
-<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
+<meta property="og:site_name" content="配置指南">
 <meta property="og:locale" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Claude Code 配置 MCP">
 <meta name="twitter:description" content="加 Server、常用清单与安全边界。">
-<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/mcp-setup.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Article","headline":"Claude Code 配置 MCP：加 Server、常用清单与安全边界","description":"claude mcp add 命令写法、项目级配置、常用 Server 能力与安全风险。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/mcp-setup.html"}},
+{"@type":"Article","headline":"Claude Code 配置 MCP：加 Server、常用清单与安全边界","description":"claude mcp add 命令写法、项目级配置、常用 Server 能力与安全风险。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/mcp-setup.html"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"MCP 和直接给 AI 一个 API Key 有什么区别？","acceptedAnswer":{"@type":"Answer","text":"MCP 是让模型通过一个受控进程访问外部系统，而不是把凭据直接塞进 prompt。Server 进程自己持有凭据，模型只能调用 Server 暴露的工具。理论上更可控，但如果 Server 本身权限过大，风险一样存在。"}},
 {"@type":"Question","name":"为什么加了 MCP Server 但 Claude Code 里看不到工具？","acceptedAnswer":{"@type":"Answer","text":"三个常见原因：命令路径不对（npx 在非交互环境找不到）、Server 启动失败但没报错、或作用域不对。先用 claude mcp list 看状态，再单独手动运行一次 Server 命令看它的报错。"}},
@@ -60,7 +60,6 @@ th{color:var(--dim);font-size:13px}
 .p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
 .cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
 footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
-</style>
 </style>
 </head>
 <body>
@@ -209,12 +208,7 @@ claude mcp remove <名字>
 
 <p class="note">MCP 让 AI 能改更多东西，验收压力也更大：<a href="review-ai-code.html">按风险排序的检查清单</a>。</p>
 
-<div class="cta">
-  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Claude Code 用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
-  QQ 邮箱注册，无需邀请码，按量计费。MCP Server 的包名与命令随版本变化，以官方 servers 仓库当前说明为准。
-  <a href="" rel="nofollow noopener">→ 注册入口</a>
-  · <a href="./">返回指南首页</a>
-</div>
+<p class="note"><a href="./">← 返回指南首页</a></p>
 
 </div>
 </body>

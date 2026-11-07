@@ -9,12 +9,12 @@
 <meta property="og:description" content="十款工具的配置文件路径与可复制片段：Gemini CLI、Aider、OpenCode、Windsurf、Cline、Roo Code、Continue、Cursor、Zed、JetBrains。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/tools.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/tools.html">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Article","headline":"AI 编程工具接中转站配置大全（2026）","description":"十款 AI 编程工具的配置文件路径与可复制片段。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"}},
+{"@type":"Article","headline":"AI 编程工具接中转站配置大全（2026）","description":"十款 AI 编程工具的配置文件路径与可复制片段。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"Gemini CLI 能用 OpenAI 兼容端点吗？","acceptedAnswer":{"@type":"Answer","text":"不能直接用。Gemini CLI 走的是 Google 自己的协议，只有部分版本支持 GOOGLE_GEMINI_BASE_URL 指向兼容网关；若不支持，只能用官方 key 或在网关侧做协议转换。"}},
 {"@type":"Question","name":"为什么工具里配了 base_url 还报 404？","acceptedAnswer":{"@type":"Answer","text":"九成是路径问题。多数 SDK 会自己在 base_url 后拼 /chat/completions，所以 base_url 只写到 /v1；而少数工具要你写完整路径。两种都试一次就能确定。"}},
@@ -104,7 +104,7 @@ export AIDER_WEAK_MODEL="gpt-5.1-mini"</code></pre>
 <h3>Codex CLI</h3>
 <p><code>~/.codex/config.toml</code>：</p>
 <pre><code>[model_providers.relay]
-name = "Sample Gateway"
+name = "示例网关"
 base_url = "https://your-endpoint.example.com/v1"
 env_key = "RELAY_API_KEY"
 
@@ -144,7 +144,7 @@ model_provider = "relay"</code></pre>
 <p><code>~/.continue/config.json</code>（新版是 <code>config.yaml</code>）：</p>
 <pre><code>{
   "models": [{
-    "title": "Sample Gateway",
+    "title": "示例网关",
     "provider": "openai",
     "model": "gpt-5.1",
     "apiBase": "https://your-endpoint.example.com/v1",
@@ -168,11 +168,7 @@ model_provider = "relay"</code></pre>
 
 <p class="note">第一次装 Claude Code 的完整流程见 <a href="claude-code-setup.html">安装配置教程</a>。</p>
 
-<div class="cta">
-  <strong>本文所有示例用的端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Anthropic 协议用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
-  QQ 邮箱注册，无需邀请码，按量计费；注册时填渠道码可领额外额度。
-  <a href="" rel="nofollow noopener">→ 注册入口</a> · <a href="index.html">配置指南</a> · <a href="cost-compare.html">成本对照</a>
-</div>
+<p class="note"><a href="./">← 返回指南首页</a></p>
 
 <footer>
   <a href="index.html">配置指南</a> ·

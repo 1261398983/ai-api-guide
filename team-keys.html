@@ -9,11 +9,11 @@
 <meta property="og:description" content="用量归属、泄露影响面、并发挤占、人员流动——以及按人分配子 key 的做法。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/team-keys.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/team-keys.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"团队共用一套 API Key 的四个坑，以及按人分配的正确做法","description":"共用 key 的风险与按人/按项目分配子 key 的配置方法。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/team-keys.html"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"一把 key 给整个团队用会有什么问题？","acceptedAnswer":{"@type":"Answer","text":"四个：用量无法归属到人；key 泄露时全员受影响且无法定位来源；并发或速率上限是共享的，会互相挤占；成员离职后无法单独回收其访问权。"}},{"@type":"Question","name":"应该按人还是按项目分配 key？","acceptedAnswer":{"@type":"Answer","text":"两者都要。人负责「谁在用」，项目负责「花在哪」。常见做法是每人一把个人 key 用于交互式使用，每个服务各一把项目 key 用于线上调用。"}},{"@type":"Question","name":"子 key 的额度怎么设？","acceptedAnswer":{"@type":"Answer","text":"按历史用量设上限，个人 key 月度额度设为近三个月峰值的 1.5 倍；项目 key 按预算设硬上限，并开启余额告警。"}}]}]}
+{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"团队共用一套 API Key 的四个坑，以及按人分配的正确做法","description":"共用 key 的风险与按人/按项目分配子 key 的配置方法。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/team-keys.html"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"一把 key 给整个团队用会有什么问题？","acceptedAnswer":{"@type":"Answer","text":"四个：用量无法归属到人；key 泄露时全员受影响且无法定位来源；并发或速率上限是共享的，会互相挤占；成员离职后无法单独回收其访问权。"}},{"@type":"Question","name":"应该按人还是按项目分配 key？","acceptedAnswer":{"@type":"Answer","text":"两者都要。人负责「谁在用」，项目负责「花在哪」。常见做法是每人一把个人 key 用于交互式使用，每个服务各一把项目 key 用于线上调用。"}},{"@type":"Question","name":"子 key 的额度怎么设？","acceptedAnswer":{"@type":"Answer","text":"按历史用量设上限，个人 key 月度额度设为近三个月峰值的 1.5 倍；项目 key 按预算设硬上限，并开启余额告警。"}}]}]}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -114,7 +114,7 @@ git grep -nE "sk-[A-Za-z0-9]{16,}" || echo "clean"</code></pre>
 <h2>关于示例端点</h2>
 <div class="card">
   <p>本矩阵示例统一用 <code>https://your-endpoint.example.com/v1</code>。它的面板支持创建多把 API key 与查看用量，适合按上面的两层结构拆分；具体额度与并发上限以站点后台实际展示为准。</p>
-  <a class="cta" href="" target="_blank" rel="nofollow noopener">→ 打开注册页</a>
+  
   <p class="note">注册时在推广码栏填渠道码可领额外额度；团队使用建议先充最小额度验证。</p>
 </div>
 

@@ -9,11 +9,11 @@
 <meta property="og:description" content="采购前要问的三件事、无法开票时的四条替代路径、团队账号管理注意事项。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/invoice.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/invoice.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"AI API 中转站能开发票吗？企业采购与报销实操","description":"中转站采购前的开票问询清单、无法开票时的合规替代路径与团队账号管理。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/invoice.html"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"大部分 AI API 中转站能开增值税发票吗？","acceptedAnswer":{"@type":"Answer","text":"多数不能。中转站常由个人或小团队运营，没有对公账户和开票资质。采购前必须直接问：能否开票、发票类型（普票/专票）、开票主体名称、开票内容类目。"}},{"@type":"Question","name":"开不了发票，公司还能报销这笔支出吗？","acceptedAnswer":{"@type":"Answer","text":"取决于公司财务制度。常见可行路径是走个人垫付后按「软件服务费」凭支付凭证与订单明细报销，或改用支持开票的官方 API / 云厂商市场下单。具体以本单位财务口径为准。"}},{"@type":"Question","name":"团队多人共用一套 API key 有什么风险？","acceptedAnswer":{"@type":"Answer","text":"无法区分用量归属、一处泄露全员受影响、并发超限会互相挤占。建议按人发子 key 或按项目分组，并保留调用日志。"}}]}]}
+{"@context":"https://schema.org","@graph":[{"@type":"Article","headline":"AI API 中转站能开发票吗？企业采购与报销实操","description":"中转站采购前的开票问询清单、无法开票时的合规替代路径与团队账号管理。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/invoice.html"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"大部分 AI API 中转站能开增值税发票吗？","acceptedAnswer":{"@type":"Answer","text":"多数不能。中转站常由个人或小团队运营，没有对公账户和开票资质。采购前必须直接问：能否开票、发票类型（普票/专票）、开票主体名称、开票内容类目。"}},{"@type":"Question","name":"开不了发票，公司还能报销这笔支出吗？","acceptedAnswer":{"@type":"Answer","text":"取决于公司财务制度。常见可行路径是走个人垫付后按「软件服务费」凭支付凭证与订单明细报销，或改用支持开票的官方 API / 云厂商市场下单。具体以本单位财务口径为准。"}},{"@type":"Question","name":"团队多人共用一套 API key 有什么风险？","acceptedAnswer":{"@type":"Answer","text":"无法区分用量归属、一处泄露全员受影响、并发超限会互相挤占。建议按人发子 key 或按项目分组，并保留调用日志。"}}]}]}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -104,7 +104,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
 <div class="card">
   <p>要票 → 走官方或云市场；不要票但要便宜 → 中转 + 个人垫付报销；团队用 → 子 key + 日志 + 小额预付。</p>
   <p>本站示例端点 <code>https://your-endpoint.example.com/v1</code> 属于第二类：按量计费、支持个人充值，<strong>开票能力需直接向站点确认</strong>，本文不做承诺。</p>
-  <a class="cta" href="" target="_blank" rel="nofollow noopener">→ 打开注册页</a>
+  
   <p class="note">先充最小额度验证可用性，再决定是否扩大用量；开票问题请在充值前问清。</p>
 </div>
 

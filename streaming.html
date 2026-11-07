@@ -9,12 +9,12 @@
 <meta property="og:description" content="一次性返回 vs 逐字返回，四层定位：客户端没开 stream、网关缓冲、代理超时、上游不支持。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/streaming.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/streaming.html">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Article","headline":"流式输出卡住不动？中转 SSE 逐层排查","description":"流式失效的四层定位方法与 nginx / Cloudflare / 客户端配置。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"}},
+{"@type":"Article","headline":"流式输出卡住不动？中转 SSE 逐层排查","description":"流式失效的四层定位方法与 nginx / Cloudflare / 客户端配置。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"为什么开了 stream:true 还是一次性返回全部内容？","acceptedAnswer":{"@type":"Answer","text":"最常见的原因不是上游，而是中间层缓冲。nginx 默认 proxy_buffering on 会把上流数据攒够一块再发；Cloudflare 免费版也会缓冲。客户端侧 axios / requests 的默认读取方式同样会等整个响应体结束。"}},
 {"@type":"Question","name":"流式输出到第 100 秒突然断掉是什么原因？","acceptedAnswer":{"@type":"Answer","text":"Cloudflare 免费版对单个请求有 100 秒的响应超时。长回复或长思考会撞上这个上限，表现为内容吐到一半连接被切断，且通常没有明确报错。"}},
@@ -156,11 +156,7 @@ X-Accel-Buffering: no</code></pre>
 <li>流到一半断 → 查超时（Cloudflare 100s、nginx read_timeout）</li>
 </ol>
 
-<div class="cta">
-  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Anthropic 协议不带 <code>/v1</code>）<br>
-  QQ 邮箱注册，无需邀请码，按量计费；支持 OpenAI 与 Anthropic 两套协议。
-  <a href="" rel="nofollow noopener">→ 注册入口</a> · <a href="tools.html">工具配置大全</a> · <a href="errors.html">错误码对照</a>
-</div>
+<p class="note"><a href="./">← 返回指南首页</a></p>
 
 <footer>
   <a href="index.html">配置指南</a> ·

@@ -9,12 +9,12 @@
 <meta property="og:description" content="TLS 保护的是传输，不是端点。中转方在解密后能看到完整请求与回复。附五条可执行的自查动作。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/privacy.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/privacy.html">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Article","headline":"中转站能看到你的什么：数据流向、可见范围与五条自查","description":"拆解 AI API 中转的数据流向与可见范围，给出可执行的自查与缓解动作。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"}},
+{"@type":"Article","headline":"中转站能看到你的什么：数据流向、可见范围与五条自查","description":"拆解 AI API 中转的数据流向与可见范围，给出可执行的自查与缓解动作。","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"用了 HTTPS，中转站还能看到我的内容吗？","acceptedAnswer":{"@type":"Answer","text":"能。TLS 只保护客户端到中转服务器这一段，中转服务器是链路的终点之一，解密后拿到的是完整明文请求和回复，包括你的 prompt、贴进去的代码和模型输出。"}},
 {"@type":"Question","name":"把代码发给 AI，会不会被用于训练？","acceptedAnswer":{"@type":"Answer","text":"取决于上游服务商的政策，不由中转方单独决定。中转方通常会在协议里说明是否留存，但上游是否用于训练需要看上游服务商自己的条款。要确认只能逐层查。"}},
@@ -143,11 +143,7 @@ customer_id=8842          →  customer_id=CUSTOMER_A</code></pre>
 
 <p class="note">MCP Server 会扩大数据可见面：<a href="mcp-setup.html">MCP 的安全边界</a>。</p>
 
-<div class="cta">
-<strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Anthropic 协议不带 <code>/v1</code>）<br>
-  第三方转发服务，<strong>同样属于「多一层可见方」</strong>；是否记录、留存多久请直接向运营方确认，本文不给保证。
-  <a href="" rel="nofollow noopener">→ 注册入口（建议最小额度）</a> · <a href="risk.html">风险自查</a> · <a href="team-keys.html">团队 Key</a>
-</div>
+<p class="note"><a href="./">← 返回指南首页</a></p>
 
 <footer>
   <a href="index.html">配置指南</a> ·

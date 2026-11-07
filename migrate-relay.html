@@ -6,11 +6,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>换中转站不用改代码：Claude Code / Codex CLI / Cherry Studio 迁移清单</title>
 <meta name="description" content="换中转站不用改代码：Claude Code / code CLI / Cherry Studio / Cline 的 base_url 迁移清单，含九个容易被漏掉的检查点与回滚方法。">
-<meta name="keywords" content="Sample Gateway,逆向工程 API,国模 API,DeepSeek API 中转,Claude API 中转,AI API 网关,API 中转站,按量计费">
+<meta name="keywords" content="AI API 网关,API 中转站,Claude API,GPT API,DeepSeek API,Claude Code 配置,API 接入教程">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/migrate-relay.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <meta property="og:title" content="换中转站不用改代码：全工具迁移清单">
-<meta property="og:description" content="Sample Gateway 逆向工程 API 网关：国模（DeepSeek 等）+ Claude / GPT / Gemini / Grok 统一端点，QQ 邮箱注册，按量计费，输入输出分开计价。附 AI API 中转站导航与实测清单。">
+<meta property="og:description" content="AI API 网关配置指南：Claude / GPT / Gemini / Grok 统一端点接入方法，附中转站选择标准与实测清单。">
 <meta property="og:type" content="article">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -47,7 +47,7 @@ pre{position:relative;background:#070b16;border:1px solid var(--line);border-rad
 footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--dim);font-size:13.5px}
 a{color:#7fa8ff}
 </style>
-  <script type="application/ld+json">{"isPartOf":{"url":"https://1261398983.github.io/ai-api-guide/","name":"Sample Gateway 配置指南","@type":"WebSite"},"description":"切换 AI API 中转站只需改环境变量。附 Claude Code、Codex CLI、Cherry Studio、Cline、LobeChat 的完整配置与迁移检查清单。","inLanguage":"zh-CN","@context":"https://schema.org","@type":"Article","headline":"换中转站不用改代码：Claude Code / Codex CLI / Cherry Studio 迁移清单","url":"https://1261398983.github.io/ai-api-guide/migrate-relay.html"}</script>
+  <script type="application/ld+json">{"isPartOf":{"url":"https://1261398983.github.io/ai-api-guide/","name":"配置指南","@type":"WebSite"},"description":"切换 AI API 中转站只需改环境变量。附 Claude Code、Codex CLI、Cherry Studio、Cline、LobeChat 的完整配置与迁移检查清单。","inLanguage":"zh-CN","@context":"https://schema.org","@type":"Article","headline":"换中转站不用改代码：Claude Code / Codex CLI / Cherry Studio 迁移清单","url":"https://1261398983.github.io/ai-api-guide/migrate-relay.html"}</script>
 </head>
 <body>
 <div class="wrap">
@@ -114,31 +114,6 @@ hy3                    hy4</pre>
 <p>不能，key 是站点级别的。</p>
 <b>Q：担心新站跑路？</b>
 <p>1 元起充的站先充最低额度，跑两周再续。</p>
-</div>
-
-<h2>六、我在用的方案</h2>
-<div class="card">
-<b>removed</b>
-<ul>
-<li>端点：<code>https://your-endpoint.example.com/v1</code>（Claude Code 填不带 /v1 的根域名）</li>
-<li>一个 base URL 同时支持 OpenAI 三端点与 Anthropic Messages</li>
-<li>QQ 邮箱注册，支付宝 / 微信充值，按量计费，余额不过期</li>
-<li>分组倍率：国模 0.08x，open ai pro 0.22x（后台可见）</li>
-</ul>
-</div>
-
-<div class="qbox">
-  <img src="qr-aff-mjyj.png" alt="removed 注册二维码">
-  <div>
-    <b style="font-size:17px;display:block;margin-bottom:8px">扫码直达注册</b>
-    <p style="color:var(--dim);font-size:14.5px;margin:0 0 14px">邮箱注册，支付宝 / 微信充值</p>
-    <a class="cta" href="" rel="nofollow noopener">立即注册（邀请码 MJYJ）</a>
-    <a class="cta ghost" href="" rel="nofollow noopener">主站入口</a>
-  </div>
-</div>
-
-<div class="note">
-聚合中转非官方，无企业 SLA。要合规保证请走模型厂商官方 API。我用的是邀请链接，会带来约 10% 返佣。
 </div>
 
 <footer>

@@ -6,24 +6,24 @@
 <title>AI 编程该用哪个模型：Opus / Sonnet / Haiku / GPT / DeepSeek 按任务选型</title>
 <meta name="description" content="不是所有任务都值得上最强模型。按「重推理 / 日常 / 机械」三档拆开，给出 Claude、GPT、Gemini、DeepSeek 各自的适用场景与混合省钱的搭配方式，避免用贵模型干机械活。">
 <meta name="keywords" content="claude opus 和 sonnet 区别,claude code 用哪个模型,AI 编程模型选择,deepseek 写代码,haiku 够用吗,模型对比,API 选型">
-<meta name="author" content="Sample Gateway">
+<meta name="author" content="示例网关">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:title" content="AI 编程该用哪个模型：按任务分三档选">
 <meta property="og:description" content="重推理 / 日常 / 机械 —— 三档对应不同模型，混着用能省一半以上。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/model-choice.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
-<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
+<meta property="og:site_name" content="配置指南">
 <meta property="og:locale" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="AI 编程该用哪个模型：按任务分三档选">
 <meta name="twitter:description" content="不是所有任务都值得上最强模型。">
-<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/model-choice.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Article","headline":"AI 编程该用哪个模型：按任务分三档选","description":"按重推理、日常、机械三档拆分任务，对应不同模型，给出混合搭配方式。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/model-choice.html"}},
+{"@type":"Article","headline":"AI 编程该用哪个模型：按任务分三档选","description":"按重推理、日常、机械三档拆分任务，对应不同模型，给出混合搭配方式。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/model-choice.html"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"Claude Code 默认用哪个模型？","acceptedAnswer":{"@type":"Answer","text":"默认走 Sonnet 档。它是日常改代码的主力：速度够、质量够、价格是 Opus 的几分之一。只有在多文件重构、疑难 bug、架构设计这类需要长链条推理的任务上，切 Opus 才有明显收益。"}},
 {"@type":"Question","name":"Haiku 能不能写代码？","acceptedAnswer":{"@type":"Answer","text":"能写，但适合局部、机械的活：补全样板、改名、加日志、格式转换、写测试桩。让它做跨文件重构或者需要理解整体架构的任务，容易改出看似合理实际跑不通的代码。"}},
@@ -60,7 +60,6 @@ th{color:var(--dim);font-size:13px}
 .p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
 .cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
 footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
-</style>
 </style>
 </head>
 <body>
@@ -196,12 +195,7 @@ curl -s "https://your-endpoint.example.com/v1/models" -H "Authorization: Bearer 
 
 <p class="note">选对模型之后，验收方式也要跟上：<a href="review-ai-code.html">按风险查而不是逐行读</a>。</p>
 
-<div class="cta">
-  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Claude Code 用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
-  QQ 邮箱注册，无需邀请码，按量计费。模型清单以 <code>/v1/models</code> 实时返回为准，本文不承诺具体型号长期可用。
-  <a href="" rel="nofollow noopener">→ 注册入口</a>
-  · <a href="./">返回指南首页</a>
-</div>
+<p class="note"><a href="./">← 返回指南首页</a></p>
 
 </div>
 </body>

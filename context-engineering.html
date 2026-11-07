@@ -6,24 +6,24 @@
 <title>怎么给 AI 提供有效上下文：三层结构、规则文件写法与会话管理（2026）</title>
 <meta name="description" content="上下文不是越多越好。给出规则 / 任务 / 参考三层结构，说明 CLAUDE.md 该写什么不该写什么、何时该新开会话、以及上下文污染的四个来源和对应处理。">
 <meta name="keywords" content="AI 上下文管理,CLAUDE.md 怎么写,上下文工程,prompt 上下文,AI 编程 规则文件,会话管理">
-<meta name="author" content="Sample Gateway">
+<meta name="author" content="示例网关">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:title" content="怎么给 AI 提供有效上下文：三层结构与会话管理">
 <meta property="og:description" content="上下文不是越多越好。写什么、放哪、何时重开。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/context-engineering.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
-<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
+<meta property="og:site_name" content="配置指南">
 <meta property="og:locale" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="怎么给 AI 提供有效上下文">
 <meta name="twitter:description" content="三层结构、规则文件写法、何时重开会话。">
-<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/context-engineering.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Article","headline":"怎么给 AI 提供有效上下文：三层结构与会话管理","description":"规则/任务/参考三层结构、规则文件写法、上下文污染处理。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/context-engineering.html"}},
+{"@type":"Article","headline":"怎么给 AI 提供有效上下文：三层结构与会话管理","description":"规则/任务/参考三层结构、规则文件写法、上下文污染处理。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/context-engineering.html"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"CLAUDE.md 应该写多少字？","acceptedAnswer":{"@type":"Answer","text":"越短越好，控制在几百字以内。规则文件每轮都随请求发送，写太长有两个代价：一是 token 成本，二是稀释——规则太多时模型会漏掉其中几条。只写那些「不说就会写错」的约定。"}},
 {"@type":"Question","name":"什么时候该新开一个会话？","acceptedAnswer":{"@type":"Answer","text":"三个信号：换了不相关的任务、连续两轮修不好同一个问题、或者你已经纠正它三次以上。会话里累积的错误上下文会持续影响后续判断，越早重开越省时间。"}},
@@ -60,7 +60,6 @@ th{color:var(--dim);font-size:13px}
 .p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
 .cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
 footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
-</style>
 </style>
 </head>
 <body>
@@ -230,12 +229,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8e
   </ul>
 </div>
 
-<div class="cta">
-  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Claude Code 用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
-  QQ 邮箱注册，无需邀请码，按量计费。规则文件的具体字段名各工具不同，以你所用工当前文档为准；本文给的是组织方法。
-  <a href="" rel="nofollow noopener">→ 注册入口</a>
-  · <a href="./">返回指南首页</a>
-</div>
+<p class="note"><a href="./">← 返回指南首页</a></p>
 
 </div>
 </body>

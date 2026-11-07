@@ -6,24 +6,24 @@
 <title>Cursor 接入自定义 API 完整指南（2026）：哪些功能走你的 Key，哪些不走</title>
 <meta name="description" content="Cursor 里填了 Override Base URL 却不生效，多半是搞错了功能边界。逐项说明 Chat、Composer、Tab 补全、Agent 分别走不走自定义 API，给出可用的配置步骤与六种常见报错的定位方法。">
 <meta name="keywords" content="Cursor 配置 API,Cursor Override Base URL,cursor 自定义模型,cursor 用自己的 key,cursor tab 补全,AI 编辑器配置">
-<meta name="author" content="Sample Gateway">
+<meta name="author" content="示例网关">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:title" content="Cursor 接入自定义 API 完整指南：哪些功能走你的 Key">
 <meta property="og:description" content="Chat 走、Tab 不走、Composer 看设置——填了 Base URL 却不生效，多半是边界搞错了。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/cursor-setup.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
-<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
+<meta property="og:site_name" content="配置指南">
 <meta property="og:locale" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Cursor 接入自定义 API 完整指南">
 <meta name="twitter:description" content="哪些功能走你的 Key，哪些不走。">
-<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/cursor-setup.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Article","headline":"Cursor 接入自定义 API 完整指南（2026）","description":"逐项说明 Cursor 各功能是否走自定义 API，给出配置步骤与报错定位。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/cursor-setup.html"}},
+{"@type":"Article","headline":"Cursor 接入自定义 API 完整指南（2026）","description":"逐项说明 Cursor 各功能是否走自定义 API，给出配置步骤与报错定位。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/cursor-setup.html"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"为什么 Cursor 填了 Override Base URL 还是不走我的 key？","acceptedAnswer":{"@type":"Answer","text":"最常见的原因是仍在订阅模式。Override Base URL 只在「自带 key / OpenAI API Key」这一模式下生效。另一个原因是 Cursor Tab 补全本来就是 Cursor 自己的模型，从一开始就不读自定义端点。"}},
 {"@type":"Question","name":"Cursor 的 Tab 补全能用自定义模型吗？","acceptedAnswer":{"@type":"Answer","text":"不能。Tab 补全是 Cursor 自家训练的补全模型，本地低延迟推理，不走任何用户配置的 API。想用自定义模型的只有 Chat、Composer 和 Agent 这类对话式功能。"}},
@@ -60,7 +60,6 @@ th{color:var(--dim);font-size:13px}
 .p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
 .cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
 footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
-</style>
 </style>
 </head>
 <body>
@@ -175,12 +174,7 @@ Override Anthropic Base URL: https://your-endpoint.example.com
 
 <p class="note">Claude Code 侧的扩展能力见 <a href="mcp-setup.html">MCP 配置指南</a>。</p>
 
-<div class="cta">
-  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Anthropic 协议用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
-  QQ 邮箱注册，无需邀请码，按量计费。Cursor 版本迭代较快，界面文字以你本机为准；模型清单以 <code>/v1/models</code> 实时返回为准。
-  <a href="" rel="nofollow noopener">→ 注册入口</a>
-  · <a href="./">返回指南首页</a>
-</div>
+<p class="note"><a href="./">← 返回指南首页</a></p>
 
 </div>
 </body>

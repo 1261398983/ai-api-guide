@@ -6,24 +6,24 @@
 <title>AI 写的代码怎么验收：按风险排序的检查清单（2026）</title>
 <meta name="description" content="逐行读 AI 生成的代码效率极低。给出五类系统性缺陷、按风险排序的检查顺序、三类必须人工逐行的情形，以及一个 15 分钟能走完的验收流程。">
 <meta name="keywords" content="AI 生成代码 review,AI 代码验收,AI 编程质量,代码审查清单,AI 代码缺陷">
-<meta name="author" content="Sample Gateway">
+<meta name="author" content="示例网关">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:title" content="AI 写的代码怎么验收：按风险排序的检查清单">
 <meta property="og:description" content="五类系统性缺陷、按风险的检查顺序、15 分钟流程。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://1261398983.github.io/ai-api-guide/review-ai-code.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
-<meta property="og:site_name" content="Sample Gateway 配置指南">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
+<meta property="og:site_name" content="配置指南">
 <meta property="og:locale" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="AI 写的代码怎么验收">
 <meta name="twitter:description" content="不是逐行读，是按风险查。">
-<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta name="twitter:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/review-ai-code.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1220'/><path d='M20 46V18h13a10 10 0 0 1 0 20h-6l12 8' stroke='%234d9fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Article","headline":"AI 写的代码怎么验收：按风险排序的检查清单","description":"五类系统性缺陷、按风险的检查顺序与 15 分钟验收流程。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"Sample Gateway"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/review-ai-code.html"}},
+{"@type":"Article","headline":"AI 写的代码怎么验收：按风险排序的检查清单","description":"五类系统性缺陷、按风险的检查顺序与 15 分钟验收流程。","datePublished":"2026-11-07","dateModified":"2026-11-07","inLanguage":"zh-CN","author":{"@type":"Organization","name":"示例网关"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://1261398983.github.io/ai-api-guide/review-ai-code.html"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"AI 生成代码最常出的问题是什么？","acceptedAnswer":{"@type":"Answer","text":"只改被点到的那一处。改函数签名不找调用方、加字段不改序列化和校验、改数据结构不改默认值。这类问题的共同点是：局部看完全正确，放进项目就编译不过或运行报错。"}},
 {"@type":"Question","name":"怎么快速发现 AI 写的代码有问题？","acceptedAnswer":{"@type":"Answer","text":"不看代码先跑三件事：编译或类型检查、跑现有测试、用 grep 搜索被改动的标识符还有多少处引用。前两步机器会告诉你，第三步能抓出最典型的漏改。"}},
@@ -60,7 +60,6 @@ th{color:var(--dim);font-size:13px}
 .p-ok{background:rgba(49,214,143,.14);color:var(--ok)}
 .cta{display:inline-block;margin:20px 0 6px;padding:14px 30px;border-radius:13px;font-weight:700;color:#fff;text-decoration:none;background:linear-gradient(96deg,var(--acc),var(--acc2));box-shadow:0 12px 34px rgba(91,140,255,.3)}
 footer{margin-top:52px;padding-top:22px;border-top:1px solid #1b2748;color:#7d8ea6;font-size:13.5px;line-height:2}
-</style>
 </style>
 </head>
 <body>
@@ -214,12 +213,7 @@ grep -rn "OldType" --include=*.ts .</pre>
 
 <p class="note">验收之外，输入也决定质量：<a href="context-engineering.html">怎么给 AI 有效上下文</a>。</p>
 
-<div class="cta">
-  <strong>本文示例端点</strong>：<code>https://your-endpoint.example.com/v1</code>（Claude Code 用 <code>https://your-endpoint.example.com</code>，不带 <code>/v1</code>）<br>
-  QQ 邮箱注册，无需邀请码，按量计费。验收标准因项目而异，本文给的是通用框架，落地时按你的风险承受度调整。
-  <a href="" rel="nofollow noopener">→ 注册入口</a>
-  · <a href="./">返回指南首页</a>
-</div>
+<p class="note"><a href="./">← 返回指南首页</a></p>
 
 </div>
 </body>

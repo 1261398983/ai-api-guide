@@ -6,11 +6,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI API 中转站怎么选？6 条判断标准 + 5 个 60 秒验证动作（附实测数据）</title>
 <meta name="description" content="AI API 中转站怎么选：六条判断标准（倍率透明度、模型真实性、余额条款、稳定性、客服、可迁移性）与五个 60 秒可执行的验证动作。">
-<meta name="keywords" content="Sample Gateway,逆向工程 API,国模 API,DeepSeek API 中转,Claude API 中转,AI API 网关,API 中转站,按量计费">
+<meta name="keywords" content="AI API 网关,API 中转站,Claude API,GPT API,DeepSeek API,Claude Code 配置,API 接入教程">
 <link rel="canonical" href="https://1261398983.github.io/ai-api-guide/choosing-relay.html">
-<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/poster-official.png">
+<meta property="og:image" content="https://1261398983.github.io/ai-api-guide/og-cover.png">
 <meta property="og:title" content="AI API 中转站怎么选？6 条判断标准 + 5 个验证动作">
-<meta property="og:description" content="Sample Gateway 逆向工程 API 网关：国模（DeepSeek 等）+ Claude / GPT / Gemini / Grok 统一端点，QQ 邮箱注册，按量计费，输入输出分开计价。附 AI API 中转站导航与实测清单。">
+<meta property="og:description" content="AI API 网关配置指南：Claude / GPT / Gemini / Grok 统一端点接入方法，附中转站选择标准与实测清单。">
 <meta property="og:type" content="article">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -51,7 +51,7 @@ pre{position:relative;background:#070b16;border:1px solid var(--line);border-rad
 footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--dim);font-size:13.5px}
 a{color:#7fa8ff}
 </style>
-  <script type="application/ld+json">{"isPartOf":{"url":"https://1261398983.github.io/ai-api-guide/","name":"Sample Gateway 配置指南","@type":"WebSite"},"description":"挑 AI API 中转站的 6 条硬指标：计费透明、缓存单价、协议覆盖、倍率公开、账单颗粒度、充值门槛。附可直接复制的 curl 验证命令与真实账单拆解。","inLanguage":"zh-CN","@context":"https://schema.org","@type":"Article","headline":"AI API 中转站怎么选？6 条判断标准 + 5 个 60 秒验证动作（附实测数据）","url":"https://1261398983.github.io/ai-api-guide/choosing-relay.html"}</script>
+  <script type="application/ld+json">{"isPartOf":{"url":"https://1261398983.github.io/ai-api-guide/","name":"配置指南","@type":"WebSite"},"description":"挑 AI API 中转站的 6 条硬指标：计费透明、缓存单价、协议覆盖、倍率公开、账单颗粒度、充值门槛。附可直接复制的 curl 验证命令与真实账单拆解。","inLanguage":"zh-CN","@context":"https://schema.org","@type":"Article","headline":"AI API 中转站怎么选？6 条判断标准 + 5 个 60 秒验证动作（附实测数据）","url":"https://1261398983.github.io/ai-api-guide/choosing-relay.html"}</script>
 </head>
 <body>
 <div class="wrap">
@@ -153,33 +153,6 @@ a{color:#7fa8ff}
 <p>不能。key 是站点级别的，换站必须换 key。</p>
 <b>Q：担心跑路怎么办？</b>
 <p>小额试。先充最低额度跑两周，够用再续。</p>
-</div>
-
-<h2>七、我在用的方案</h2>
-<div class="card">
-<b>removed</b>
-<p>上面第四节的数据就是它。一个 base URL 同时支持 OpenAI 三端点与 Anthropic Messages。</p>
-<ul>
-<li>端点：<code>https://your-endpoint.example.com/v1</code></li>
-<li>注册：QQ 邮箱即可，不需要海外卡</li>
-<li>支付：支付宝 / 微信，按量计费，余额不过期</li>
-<li>分组倍率：国模 0.08x，open ai pro 0.22x（后台可见）</li>
-<li>邀请返佣 10%，无冻结无上限</li>
-</ul>
-</div>
-
-<div class="qbox">
-  <img src="qr-aff-mjyj.png" alt="removed 注册二维码">
-  <div>
-    <b style="font-size:17px;display:block;margin-bottom:8px">扫码直达注册</b>
-    <p style="color:var(--dim);font-size:14.5px;margin:0 0 14px">邮箱注册，支付宝 / 微信充值，按量计费</p>
-    <a class="cta" href="" rel="nofollow noopener">立即注册（邀请码 MJYJ）</a>
-    <a class="cta ghost" href="" rel="nofollow noopener">主站入口</a>
-  </div>
-</div>
-
-<div class="note">
-这是聚合中转，不是模型厂商官方。要企业 SLA、要数据驻留保证的，走官方 API。我用的是邀请链接，会带来约 10% 返佣；裸域名行为完全一致。
 </div>
 
 <footer>
