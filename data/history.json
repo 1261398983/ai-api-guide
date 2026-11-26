@@ -1135,9 +1135,27 @@
         "error": "Failed to parse URL from your-endpoint.example.com/v1/models"
       },
       "ok": false
+    },
+    {
+      "t": "2026-11-26T15:01:32.028Z",
+      "dir": {
+        "status": 0,
+        "ms": 15,
+        "ok": false,
+        "bytes": 0,
+        "error": "Failed to parse URL from your-endpoint.example.com/"
+      },
+      "api": {
+        "status": 0,
+        "ms": 0,
+        "ok": false,
+        "bytes": 0,
+        "error": "Failed to parse URL from your-endpoint.example.com/v1/models"
+      },
+      "ok": false
     }
   ],
-  "updatedAt": "2026-11-26T04:57:01.032Z",
+  "updatedAt": "2026-11-26T15:01:32.028Z",
   "summary": {
     "h24": {
       "total": 3,
@@ -1154,7 +1172,7 @@
       "p95Ms": null
     },
     "d30": {
-      "total": 63,
+      "total": 64,
       "up": 0,
       "uptime": 0,
       "avgMs": null,
